@@ -1,0 +1,14 @@
+method,dataset,acc,f1,prec,rec,auroc
+majority_class,verite,66.23,79.69,66.23,100.0,
+clip_sim_threshold,verite,66.33,78.76,67.64,94.27,59.77
+threshold_person_max,verite,66.13,79.62,66.2,99.85,50.96
+threshold_max_grounding,verite,66.33,79.74,66.3,100.0,50.77
+threshold_min_grounding,verite,66.13,79.62,66.2,99.85,55.51
+stream_a_logistic_regression,verite,65.67,78.23,67.03,93.94,55.29
+majority_class,mmfake,70.0,82.35,70.0,100.0,
+threshold_person_max,mmfake,69.99,82.33,70.03,99.87,49.6
+threshold_clip_sim,mmfake,70.0,82.35,70.0,99.99,48.9
+threshold_max_grounding,mmfake,70.0,82.35,70.0,99.99,48.9
+stream_a_logistic_regression,mmfake,70.6,82.76,70.59,100.0,58.09
+majority_class,newsclippings,100.0,100.0,100.0,100.0,
+clip_sim_threshold,newsclippings,,,,,

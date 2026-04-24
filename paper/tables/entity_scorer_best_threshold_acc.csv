@@ -1,0 +1,17 @@
+dataset,feature,best_acc,best_threshold
+verite,n_entities,0.6593,0.0
+verite,max_grounding,0.6746,0.3324
+verite,min_grounding,0.6724,0.276
+verite,mean_grounding,0.6735,0.2759
+verite,person_max,0.6772,0.2673
+verite,gpe_max,0.6762,0.2607
+verite,org_max,0.6983,0.3331
+verite,clip_sim,0.6633,0.3496
+mmfake,n_entities,0.588,0.0
+mmfake,max_grounding,0.7106,0.3891
+mmfake,min_grounding,0.7108,0.3884
+mmfake,mean_grounding,0.7108,0.3887
+mmfake,person_max,0.7318,0.3603
+mmfake,gpe_max,0.622,0.333
+mmfake,org_max,0.6986,0.3761
+mmfake,clip_sim,0.7106,0.3891
