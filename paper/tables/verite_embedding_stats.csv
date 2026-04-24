@@ -1,0 +1,3 @@
+file,rows,dim,dtype,norm_min,norm_max,norm_mean
+image_embeddings.npy,1001,768,float32,1.0,1.0,1.0
+text_embeddings.npy,1001,768,float32,1.0,1.0,1.0

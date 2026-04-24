@@ -1,0 +1,5 @@
+fake_cls,count
+original,3000
+textual_veracity_distortion,3000
+mismatch,3000
+visual_veracity_distortion,1000

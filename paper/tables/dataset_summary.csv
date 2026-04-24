@@ -1,0 +1,6 @@
+Dataset,Split,Total,OOC,Genuine,OOC%
+NewsCLIPpings (train),train,"71,072","35,536","35,536",50.0%
+NewsCLIPpings (val),val,"7,024","3,512","3,512",50.0%
+NewsCLIPpings (test),test,"7,264","3,632","3,632",50.0%
+VERITE,zero-shot eval,"1,001",325,676,32.5%
+MMFakeBench (OOC subset),zero-shot eval,"10,000",0,N/A,0.0%

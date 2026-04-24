@@ -1,0 +1,5 @@
+subtype,count
+semantics_clip_text_image,8884
+semantics_clip_text_text,8884
+person_sbert_text_text,8884
+scene_resnet_place,8884
