@@ -1,0 +1,3 @@
+# Ablation: MLP fusion instead of cross-attention
+model:
+  fusion_type: "mlp"    # vs "cross_attention" (default)

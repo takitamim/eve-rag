@@ -1,0 +1,26 @@
+# Large data and cache — never commit
+data/
+cache/
+experiments/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# VS Code
+.vscode/settings.json
+.vscode/launch.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Secrets / API keys
+.env
+secrets.yaml

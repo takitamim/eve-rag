@@ -1,0 +1,5 @@
+# Ablation: remove entity verification (Stream A)
+model:
+  use_stream_a: false
+  use_stream_b: true
+  use_stream_c: true

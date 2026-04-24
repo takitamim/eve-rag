@@ -1,0 +1,6 @@
+# Ablation: frozen CLIP (no LoRA in Stream B)
+model:
+  use_stream_a: true
+  use_stream_b: true
+  lora_rank: 0          # 0 = frozen, no LoRA
+  use_stream_c: true

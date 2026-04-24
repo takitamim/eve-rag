@@ -1,0 +1,4 @@
+# Ablation: MLP head instead of MLLM reasoning layer
+model:
+  use_mllm: false
+  use_mlp_head: true

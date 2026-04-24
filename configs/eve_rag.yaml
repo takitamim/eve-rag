@@ -1,0 +1,25 @@
+model:
+  clip_backbone: "ViT-L-14"
+  clip_pretrained: "openai"
+  lora_rank: 16
+  lora_alpha: 32
+  prompt_tokens: 8
+  mllm: "Qwen/Qwen2-VL-7B-Instruct"
+  mllm_lora_rank: 8
+
+training:
+  batch_size: 32
+  lr: 2.0e-4
+  epochs: 10
+  warmup_steps: 500
+  seed: 42
+
+data:
+  newsclippings_root: "data/newsclippings"
+  verite_root: "data/verite"
+  cosmos_root: "data/cosmos"
+  cache_root: "cache"
+
+evidence:
+  top_k: 5
+  stance_threshold: 0.5

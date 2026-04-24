@@ -1,0 +1,34 @@
+# Core ML
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.40.0
+peft>=0.10.0          # LoRA for CLIP and Qwen2-VL
+accelerate>=0.29.0
+
+# Vision + CLIP
+open-clip-torch>=2.24.0
+Pillow>=10.0.0
+
+# NLP / NER
+spacy>=3.7.0
+# After install run: python -m spacy download en_core_web_trf
+
+# Data
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.4.0
+datasets>=2.19.0      # HuggingFace datasets for NewsCLIPpings
+
+# Evidence retrieval
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Notebooks & viz
+jupyter>=1.0.0
+ipywidgets>=8.1.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tqdm>=4.66.0
+
+# Evaluation
+torchmetrics>=1.3.0

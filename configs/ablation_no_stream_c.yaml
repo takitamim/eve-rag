@@ -1,0 +1,5 @@
+# Ablation: remove evidence retrieval (Stream C)
+model:
+  use_stream_a: true
+  use_stream_b: true
+  use_stream_c: false
