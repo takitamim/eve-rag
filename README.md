@@ -39,3 +39,5 @@ open eve-rag.code-workspace
 
 Only `notebooks/`, `src/`, `configs/`, `paper/`, `scripts/`, `requirements.txt`.
 `data/`, `cache/`, `experiments/` are git-ignored (too large).
+
+#done from pc 
