@@ -40,4 +40,6 @@ open eve-rag.code-workspace
 Only `notebooks/`, `src/`, `configs/`, `paper/`, `scripts/`, `requirements.txt`.
 `data/`, `cache/`, `experiments/` are git-ignored (too large).
 
-#done from pc 
+#Bash code for directure structure finding: 
+tree /F /A > folder_structure.txt
+All are added to folder_structure.txt
