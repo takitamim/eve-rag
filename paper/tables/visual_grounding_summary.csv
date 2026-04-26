@@ -1,0 +1,4 @@
+dataset,rows,has_image,rows_with_vg_scores
+mmfakebench,11000,11000,7661
+newsclippings,85360,0,0
+verite,1001,621,584

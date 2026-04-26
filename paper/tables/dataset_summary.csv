@@ -1,0 +1,8 @@
+dataset_split,rows,label_0_match,label_1_mismatch,has_image_rows,unique_image_ids,empty_captions
+NewsCLIPpings train,71072,35536,35536,0,59876,0
+NewsCLIPpings val,7024,3512,3512,0,5943,0
+NewsCLIPpings test,7264,3632,3632,0,6147,0
+VERITE test,1001,338,663,621,495,0
+MMFakeBench val,1000,300,700,1000,1000,0
+MMFakeBench test,10000,3000,7000,10000,10000,0
+All,97361,46318,51043,11621,83461,0

@@ -1,0 +1,5 @@
+metric,value
+rows,1001
+rows_with_local_image,621
+unique_image_ids,495
+broken_image_paths,0

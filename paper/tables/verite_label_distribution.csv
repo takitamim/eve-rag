@@ -1,0 +1,4 @@
+raw_label,label,label_name,count
+miscaptioned,1,mismatch,338
+out-of-context,1,mismatch,325
+true,0,match,338

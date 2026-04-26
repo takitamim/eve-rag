@@ -1,0 +1,7 @@
+method,dataset,acc,precision,recall,f1,auroc
+stream_a_lr,mmfakebench_test,62.56,78.19,64.51,70.7,65.41
+majority_train,mmfakebench_test,70.0,70.0,100.0,82.35,
+caption_clip_sim_median,mmfakebench_test,58.1,78.1,55.79,65.08,64.14
+stream_a_lr,verite_test_local,53.3,69.04,54.0,60.6,53.83
+majority_train,verite_test_local,66.51,66.51,100.0,79.88,
+caption_clip_sim_median,verite_test_local,48.47,64.95,48.91,55.8,47.82

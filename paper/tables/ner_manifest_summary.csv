@@ -1,0 +1,7 @@
+manifest,rows,rows_with_entities,mean_entities,max_entities
+newsclippings_train,71072,70700,3.0355836334984243,11
+newsclippings_val,7024,6994,3.0414293849658316,9
+newsclippings_test,7264,7221,3.0338656387665197,10
+verite_test,1001,957,2.925074925074925,10
+mmfakebench_val,1000,701,1.613,7
+mmfakebench_test,10000,6960,1.6314,10

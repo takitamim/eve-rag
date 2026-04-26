@@ -1,0 +1,4 @@
+dataset,rows,has_image,mean_entities,rows_with_grounding,caption_clip_sim_available
+mmfakebench,11000,11000,1.6297272727272727,7661,11000
+newsclippings,85360,0,3.0359184629803186,0,0
+verite,1001,621,2.925074925074925,584,621

@@ -1,0 +1,5 @@
+metric,value
+flat_image_files,11495
+manifest_rows_with_image,11621
+unique_manifest_image_ids_with_image,11495
+broken_image_paths,0
