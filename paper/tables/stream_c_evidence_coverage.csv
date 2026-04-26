@@ -1,6 +1,0 @@
-split,total,covered,empty,coverage%
-train,71072,55152,15920,77.6
-val,7024,5809,1215,82.7
-test,7264,5863,1401,80.7
-verite,1001,29,972,2.9
-mmfake,10000,7712,2288,77.1

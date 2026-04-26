@@ -2,5 +2,5 @@ Method,NC test,VERITE,MMFake
 Majority baseline,0.5,0.662,0.7
 CLIP sim (vanilla),0.7197,0.7093,0.6594
 Stream A (LR),0.732,0.553,0.581
-Stream B Stage 1,0.7956,0.519,0.6154
-Stream B Stage 2,0.7371,0.7188,0.9844
+Stream B Stage 1,0.7958,0.5067,0.6089
+Stream B Stage 2,0.7287,0.4826,0.9374
