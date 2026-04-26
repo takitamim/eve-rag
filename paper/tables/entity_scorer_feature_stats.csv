@@ -1,9 +1,0 @@
-feature,n_valid,mean,std
-n_entities,96361,2.6631,1.1361
-max_grounding,93118,0.2638,0.035
-min_grounding,93118,0.2148,0.0287
-mean_grounding,93118,0.2384,0.0264
-person_max,64647,0.2626,0.0385
-gpe_max,55382,0.2261,0.032
-org_max,51127,0.2406,0.033
-clip_sim,93197,0.2882,0.0441

@@ -1,4 +1,0 @@
-dataset,total,genuine,ooc,ooc_pct
-NewsCLIPpings (all splits),85360,42680,42680,50.0
-VERITE,1001,676,325,32.5
-MMFakeBench (test),10000,3000,7000,70.0

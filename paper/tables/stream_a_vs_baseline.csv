@@ -1,4 +1,0 @@
-dataset,majority_acc,stream_a_acc,acc_gain,stream_a_auroc
-verite,66.23,55.74,-10.49,58.93
-mmfake,70.0,63.95,-6.05,48.17
-newsclippings,50.0,66.08,16.08,72.77
