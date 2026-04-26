@@ -41,5 +41,6 @@ Only `notebooks/`, `src/`, `configs/`, `paper/`, `scripts/`, `requirements.txt`.
 `data/`, `cache/`, `experiments/` are git-ignored (too large).
 
 #Bash code for directure structure finding: 
-tree /F /A > folder_structure.txt
-All are added to folder_structure.txt
+Get-ChildItem -Recurse -Force | ForEach-Object {
+  if ($_.PSIsContainer) { "DIR  $($_.FullName)" } else { "FILE $($_.FullName)" }
+} > all_files_and_folders.txt
