@@ -1,5 +1,9 @@
-dataset,acc,precision,recall,f1,auroc
-newsclippings_val,50.75,50.8,47.78,49.24,51.45
-newsclippings_test,52.04,52.15,49.37,50.72,52.17
-mmfakebench_test,30.62,93.06,0.96,1.89,61.85
-verite_test,33.77,0.0,0.0,0.0,43.58
+dataset,tuning,threshold,acc,precision,recall,f1,macro_f1,auroc
+newsclippings_val,default_0.5,0.5,50.73,50.8,45.93,48.24,50.61,51.38
+newsclippings_val,tuned,0.5,50.73,50.8,45.93,48.24,50.61,51.38
+newsclippings_test,default_0.5,0.5,51.53,51.68,46.92,49.18,51.42,51.81
+newsclippings_test,tuned,0.5,51.53,51.68,46.92,49.18,51.42,51.81
+mmfakebench_test,default_0.5,0.5,34.78,87.58,7.96,14.59,30.92,69.43
+mmfakebench_test,tuned,0.47,73.65,76.43,90.16,82.73,63.59,69.43
+verite_test,default_0.5,0.5,36.16,60.53,10.41,17.76,32.8,45.94
+verite_test,tuned,0.5,36.16,60.53,10.41,17.76,32.8,45.94

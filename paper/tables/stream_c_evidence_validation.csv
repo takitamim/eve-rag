@@ -1,7 +1,7 @@
 dataset,split,rows,empty_evidence,mean_evidence_len
-mmfakebench,test,10000,0,320.7904
-mmfakebench,val,1000,0,314.383
-newsclippings,test,7264,0,389.9386013215859
-newsclippings,train,71072,0,391.87647737505625
-newsclippings,val,7024,0,388.85279043280184
-verite,test,1001,0,222.35064935064935
+mmfakebench,test,10000,0,229.1721
+mmfakebench,val,1000,0,223.354
+newsclippings,test,7264,0,280.15996696035245
+newsclippings,train,71072,0,281.73875787933366
+newsclippings,val,7024,0,279.45173690205013
+verite,test,1001,0,99.51648351648352

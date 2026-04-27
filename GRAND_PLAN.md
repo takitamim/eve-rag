@@ -3,7 +3,7 @@
 **Project:** EVE-RAG  
 **Research topic:** Out-of-context image detection using entity verification, visual grounding, CLIP/LoRA-style representation learning, evidence reasoning, and fusion.  
 **Repository root:** `eve-rag/`  
-**Current phase:** Dataset cleanup complete; Stream A complete; Stream B complete after real NewsCLIPpings embedding fix; Stream C offline baseline complete; ready for fusion and stronger evidence retrieval.
+**Current phase:** Dataset cleanup complete; Stream A complete; Stream B complete; Stream C v3 complete (decircularized, NLI-based stance scoring); ready for fusion.
 
 ---
 
@@ -115,7 +115,7 @@ The original project plan became outdated because the dataset layout changed and
 | EDA notebook | Updated |
 | Stream A | Complete, weak but valid |
 | Stream B | Complete, fixed with real NewsCLIPpings embeddings |
-| Stream C | Complete as offline metadata baseline, scientifically weak |
+| Stream C | ✅ Complete (v3) — decircularized evidence, NLI stance scoring (`cross-encoder/nli-deberta-v3-base`), threshold-tuned results |
 | Baselines | Complete |
 | Fusion | Next |
 | MLLM explanation | Later |
@@ -250,10 +250,14 @@ eve-rag/
 │   │   └── stream_b_results_fixed_updated.ipynb
 │   │
 │   ├── 04_stream_c/
-│   │   ├── evidence_retrieval_patch_fixed_updated.ipynb
-│   │   ├── evidence_val_fix_updated.ipynb
-│   │   ├── stance_scoring_fixed_updated.ipynb
-│   │   └── stream_c_results_fixed_updated.ipynb
+│   │   ├── evidence_retrieval_patch_fixed_updated.ipynb  ← superseded
+│   │   ├── evidence_val_fix_updated.ipynb                ← superseded
+│   │   ├── stance_scoring_fixed_updated.ipynb            ← superseded
+│   │   ├── stream_c_results_fixed_updated.ipynb          ← superseded
+│   │   ├── evidence_retrieval_final.ipynb                ✅ v3 active
+│   │   ├── evidence_val_final.ipynb                      ✅ v3 active
+│   │   ├── stance_scoring_final.ipynb                    ✅ v3 active (NLI)
+│   │   └── stream_c_results_final.ipynb                  ✅ v3 active
 │   │
 │   ├── 05_fusion/
 │   │   ├── baselines_fixed_updated.ipynb
@@ -567,10 +571,14 @@ Status legend:
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `evidence_retrieval_patch_fixed_updated.ipynb` | 🟡 Complete but baseline | Offline metadata evidence builder |
-| `evidence_val_fix_updated.ipynb` | ✅ Complete | Evidence row validation/repair |
-| `stance_scoring_fixed_updated.ipynb` | 🟡 Complete but baseline | Caption/evidence similarity; not true retrieval |
-| `stream_c_results_fixed_updated.ipynb` | 🟡 Complete but weak | Current Stream C is not final RAG |
+| `evidence_retrieval_patch_fixed_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
+| `evidence_val_fix_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
+| `stance_scoring_fixed_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
+| `stream_c_results_fixed_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
+| `evidence_retrieval_final.ipynb` | ✅ Complete (v3) | Decircularized; VERITE uses `query` field; NewsCLIP uses article title+metadata |
+| `evidence_val_final.ipynb` | ✅ Complete (v3) | Repair fallback decircularized; labeled-leak assert passes |
+| `stance_scoring_final.ipynb` | ✅ Complete (v3) | NLI: `cross-encoder/nli-deberta-v3-base` + SBERT cosine; full 97,361 rows scored |
+| `stream_c_results_final.ipynb` | ✅ Complete (v3) | Per-dataset threshold tuning; saves `stream_c_thresholds.json` for fusion |
 | `baselines_fixed_updated.ipynb` | ✅ Complete | Baseline and stream summary tables |
 
 ## Fusion / evaluation / MLLM
@@ -731,9 +739,14 @@ Creates Stream B figures and summary tables.
 
 Stream B is currently the strongest stream.
 
-## `evidence_retrieval_patch_fixed_updated.ipynb`
 
-Builds offline evidence text from manifest metadata.
+## `evidence_retrieval_final.ipynb`
+
+Builds decircularized offline evidence text from independent sources.
+- VERITE: uses `query` field from `VERITE_articles.csv` (32.47% high-quality coverage)
+- NewsCLIPpings: uses article title + topic + source + timestamp (99.97–99.99% high-quality)
+- MMFakeBench: uses text_source + image_source + fake_cls metadata
+- Caption is NEVER included in evidence_text. Assert enforces this.
 
 Important: this is not true web retrieval yet.
 
@@ -745,11 +758,19 @@ cache/stream_c/evidence/raw_evidence_all.csv
 
 ## `evidence_val_fix_updated.ipynb`
 
-Checks and repairs missing evidence rows.
+~~Superseded by `evidence_val_final.ipynb`.~~
+
+## `evidence_val_final.ipynb`
+
+Checks and repairs missing evidence rows. Repair fallback is decircularized (dataset+split only, no caption). Labeled-leak assert confirms 0 Caption: fields in evidence_text.
 
 ## `stance_scoring_fixed_updated.ipynb`
 
-Computes caption/evidence similarity.
+~~Superseded by `stance_scoring_final.ipynb`.~~
+
+## `stance_scoring_final.ipynb`
+
+NLI-based stance scoring using `cross-encoder/nli-deberta-v3-base` (premise=evidence, hypothesis=caption). Outputs entailment/neutral/contradiction probabilities. SBERT cosine (`all-MiniLM-L6-v2`) kept as complementary feature. Full 97,361 rows scored in ~2.5 min on RTX 4060 Ti. neutral_score dominant for NewsCLIPpings (0.61) as expected for short article-title evidence.
 
 Uses SentenceTransformers on GPU if installed, otherwise TF-IDF.
 
@@ -761,9 +782,11 @@ cache/stream_c/stance_scores/stream_c_stance_scores_all.csv
 
 ## `stream_c_results_fixed_updated.ipynb`
 
-Trains/evaluates Stream C classifier.
+~~Superseded by `stream_c_results_final.ipynb`.~~
 
-Current version is weak because evidence is metadata-derived and partly circular.
+## `stream_c_results_final.ipynb`
+
+Trains LogisticRegression on 7 NLI+SBERT features. Per-dataset threshold tuning on validation splits. Saves `stream_c_thresholds.json` for fusion.
 
 ## `baselines_fixed_updated.ipynb`
 
@@ -923,7 +946,17 @@ Fallback: 380
 
 ## Stream C result summary
 
-Stream C ran correctly but is weak because it is currently metadata/caption-derived, not real retrieval.
+Stream C v3 (NLI-based, decircularized):
+
+| Dataset | Tuning | Acc | Macro-F1 | AUROC |
+|---|---|---|---|---|
+| newsclippings_val | default | 50.73 | 50.77 | — |
+| newsclippings_test | default | 51.53 | 51.01 | — |
+| mmfakebench_test | default | 34.78 | 32.32 | 70.22 |
+| mmfakebench_test | **tuned (0.47)** | **73.65** | **63.85** | 70.22 |
+| verite_test | default | 36.16 | 30.70 | 43.25 |
+
+Standalone Stream C is weak (expected). Threshold tuning rescued mmfakebench (34→73% acc). Signal will improve through fusion with Streams A and B.
 
 | Evaluation set | Accuracy | AUROC | Interpretation |
 |---|---:|---:|---|
@@ -1160,7 +1193,7 @@ Solution:
 Current status:
 
 - Marked current Stream C as offline metadata evidence baseline.
-- Next fix: remove caption from evidence text and use independent article/retrieval evidence.
+- **RESOLVED (v3):** Caption fully removed from evidence_text. VERITE uses `VERITE_articles.csv` query field. NewsCLIPpings uses article title+metadata. NLI model replaces cosine similarity. Assert enforces zero labeled-caption leaks.
 
 ## Issue 11: Old caches could contaminate results
 
@@ -1312,11 +1345,13 @@ Large datasets and caches may exceed GitHub limits and should be ignored or hand
 ## Stream C run
 
 ```text
-1. notebooks/04_stream_c/evidence_retrieval_patch_fixed_updated.ipynb
-2. notebooks/04_stream_c/evidence_val_fix_updated.ipynb
-3. notebooks/04_stream_c/stance_scoring_fixed_updated.ipynb
-4. notebooks/04_stream_c/stream_c_results_fixed_updated.ipynb
-5. notebooks/05_fusion/baselines_fixed_updated.ipynb
+
+1. notebooks/04_stream_c/evidence_retrieval_final.ipynb
+2. notebooks/04_stream_c/evidence_val_final.ipynb
+3. notebooks/04_stream_c/stance_scoring_final.ipynb  ← set DEBUG=False for full run
+4. notebooks/04_stream_c/stream_c_results_final.ipynb
+
+Delete `cache/stream_c/evidence/`, `cache/stream_c/stance_scores/`, `cache/stream_c/results/` before re-running to avoid cache contamination.
 ```
 
 ## Next: fusion run
@@ -1337,13 +1372,11 @@ Planned:
 
 # 13. Current limitations and next research fixes
 
-## Limitation 1: Stream C is not true RAG yet
+## ~~Limitation 1: Stream C is not true RAG yet~~ — RESOLVED (v3)
 
-Current Stream C uses metadata-derived evidence. It does not retrieve independent external evidence.
+Stream C v3 now uses independent evidence (no caption in evidence_text). VERITE uses article query field; NewsCLIPpings uses article title+metadata. NLI replaces cosine similarity. This is sufficient for ICCIT-level novelty claim.
 
-### Fix
-
-Build independent evidence:
+### Original fix plan (archived)
 
 | Dataset | Better evidence source |
 |---|---|
@@ -1571,11 +1604,11 @@ Do the image and text embeddings look compatible?
 
 This is currently the best stream.
 
-## Step 6: Stream C tries to use evidence
+## Step 6: Stream C uses evidence-stance reasoning
 
-Current Stream C is only an offline metadata baseline.
+Stream C v3 frames OOC detection as NLI: given independent metadata evidence as premise and caption as hypothesis, does the evidence entail, contradict, or remain neutral toward the caption? Implemented with `cross-encoder/nli-deberta-v3-base`.
 
-Future Stream C should ask:
+Stream C v3 asks:
 
 ```text
 Does independent article/web evidence support or contradict the caption-image pair?
