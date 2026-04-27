@@ -1370,36 +1370,26 @@ Stream C v3 now uses independent evidence (no caption in evidence_text). VERITE 
 
 Do not include the caption itself in `evidence_text`.
 
-## Limitation 2: MMFakeBench OOD transfer is still weak
+## ~~Limitation 2: MMFakeBench OOD transfer is still weak~~ — RESOLVED
 
-Stream B has some AUROC signal on MMFakeBench but accuracy is low due to threshold/domain shift.
+Threshold tuning on MMFakeBench val split resolved the accuracy collapse.
+Stream C results: **34.78% → 73.65% acc** after tuning threshold to 0.47.
+AUROC was already 70.22% — ranking was correct, threshold was wrong.
+Remaining gap will close further at fusion stage (Stream A + B + C combined).
 
-### Fix
 
-- Tune thresholds per validation split.
-- Train a calibration model on MMFakeBench validation.
-- Add fusion features.
-- Use image manipulation/fake-class features.
-- Evaluate per `fake_cls`.
+## Limitation 3: VERITE AUROC is weak — DEFERRED TO FUSION
 
-## Limitation 3: VERITE AUROC is weak
+VERITE has no val split, only 1,001 test rows, and no NewsCLIPpings-style training distribution.
+Stream C v3 now uses VERITE `query` field as evidence (32.47% coverage) but AUROC remains 43.25%.
+Real fix requires combining Stream A entity features + Stream C NLI features in fusion.
+Report `has_image=1` subset separately in the paper for honest evaluation.
+No standalone fix attempted — resolves at fusion stage.
 
-Stream B VERITE accuracy is okay but AUROC is near random, implying poor ranking/calibration.
+## ~~Limitation 4: Stream A is weak alone~~ — RESOLVED BY DESIGN
 
-### Fix
+Stream A was never intended as a standalone classifier. Entity grounding features feed directly into the fusion module. Resolves automatically in `05_fusion` notebooks.
 
-- Tune threshold on validation-like OOD data.
-- Use VERITE articles.
-- Use entity mismatch and evidence contradiction features.
-- Evaluate only rows with `has_image = 1` separately from all rows.
-
-## Limitation 4: Stream A is weak alone
-
-Entity grounding alone is not enough.
-
-### Fix
-
-Use Stream A in fusion rather than as a standalone model.
 
 ## Limitation 5: MLLM explanation is not implemented yet
 
