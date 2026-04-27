@@ -1,4 +1,9 @@
 method,dataset,acc,precision,recall,f1,auroc
+clip_cosine_threshold,newsclippings_test,65.75,65.75,65.75,65.75,71.97
 clip_cosine_rank,newsclippings_test,65.74,65.73,65.75,65.74,71.97
+clip_cosine_threshold,mmfakebench_val,53.4,73.4,52.43,61.17,55.06
+clip_cosine_rank,mmfakebench_val,53.5,73.45,52.57,61.28,55.06
+clip_cosine_threshold,mmfakebench_test,58.12,78.12,55.8,65.1,64.13
 clip_cosine_rank,mmfakebench_test,58.13,78.12,55.81,65.11,64.13
+clip_cosine_threshold,verite_test,48.35,64.6,48.72,55.55,48.54
 clip_cosine_rank,verite_test,48.25,64.47,48.72,55.5,48.54
