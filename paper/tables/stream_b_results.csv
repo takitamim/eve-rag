@@ -1,0 +1,5 @@
+dataset,acc,precision,recall,f1,auroc
+newsclippings_val,66.22,67.97,61.33,64.48,73.42
+newsclippings_test,65.87,67.6,60.96,64.11,73.91
+mmfakebench_test,46.95,82.38,30.8,44.84,63.35
+verite_test_local,63.77,66.32,92.49,77.25,49.12

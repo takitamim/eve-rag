@@ -43,4 +43,4 @@ Only `notebooks/`, `src/`, `configs/`, `paper/`, `scripts/`, `requirements.txt`.
 #Bash code for directure structure finding: 
 Get-ChildItem -Recurse -Force | ForEach-Object {
   if ($_.PSIsContainer) { "DIR  $($_.FullName)" } else { "FILE $($_.FullName)" }
-} > all_files_and_folders.txt
+} > directory_details.txt

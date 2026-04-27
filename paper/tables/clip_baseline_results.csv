@@ -1,0 +1,4 @@
+method,dataset,acc,precision,recall,f1,auroc
+clip_cosine_rank,newsclippings_test,65.74,65.73,65.75,65.74,71.97
+clip_cosine_rank,mmfakebench_test,58.13,78.12,55.81,65.11,64.13
+clip_cosine_rank,verite_test,48.25,64.47,48.72,55.5,48.54

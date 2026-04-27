@@ -1,123 +1,140 @@
-# GRAND_PLAN.md — EVE-RAG Project Guide
+# GRAND_PLAN.md — EVE-RAG Full Project Guide
 
-**Project:** EVE-RAG: Entity-aware, Evidence-aware, Retrieval-augmented Out-of-Context Image Detection  
+**Project:** EVE-RAG  
+**Research topic:** Out-of-context image detection using entity verification, visual grounding, CLIP/LoRA-style representation learning, evidence reasoning, and fusion.  
 **Repository root:** `eve-rag/`  
-**Current project phase:** dataset cleanup completed; manifest layer rebuilt; notebooks now need to be migrated to the processed manifest layer.  
-**Last major update:** after restructuring raw/processed data and building the flat processed image folder.
+**Current phase:** Dataset cleanup complete; Stream A complete; Stream B complete after real NewsCLIPpings embedding fix; Stream C offline baseline complete; ready for fusion and stronger evidence retrieval.
 
 ---
 
 ## Table of Contents
 
-1. [What this project is about](#1-what-this-project-is-about)
+1. [Project overview](#1-project-overview)
 2. [Plan summary](#2-plan-summary)
 3. [Final directory structure](#3-final-directory-structure)
-4. [Dataset details and what we gained](#4-dataset-details-and-what-we-gained)
+4. [Dataset details and gains](#4-dataset-details-and-gains)
 5. [Dataset preprocessing and processing](#5-dataset-preprocessing-and-processing)
 6. [Notebook names and completion status](#6-notebook-names-and-completion-status)
 7. [Notebook summaries](#7-notebook-summaries)
-8. [Outputs: tables and figures](#8-outputs-tables-and-figures)
+8. [Output tables and figures](#8-output-tables-and-figures)
 9. [Output summary so far](#9-output-summary-so-far)
 10. [Issues faced and how we solved them](#10-issues-faced-and-how-we-solved-them)
-11. [How to use the project now](#11-how-to-use-the-project-now)
-12. [Important implementation notes](#12-important-implementation-notes)
-13. [Glossary](#13-glossary)
-14. [Beginner mental model](#14-beginner-mental-model)
-15. [Next steps](#15-next-steps)
+11. [Important implementation notes](#11-important-implementation-notes)
+12. [How to run the project](#12-how-to-run-the-project)
+13. [Current limitations and next research fixes](#13-current-limitations-and-next-research-fixes)
+14. [Glossary](#14-glossary)
+15. [Beginner mental model](#15-beginner-mental-model)
 
 ---
 
-# 1. What this project is about
+# 1. Project overview
 
-This project studies **out-of-context image detection**.
+EVE-RAG is a research project for **out-of-context image detection**.
 
-The basic problem is:
+The task is:
 
-> Given an image and a caption/context text, decide whether the image truly belongs with the text.
+> Given an image and a caption/context text, decide whether the image truly belongs with the text or whether it has been reused in a misleading/out-of-context way.
 
-A pair can be:
+A sample is an **image-text pair**. It has a binary label:
 
-| Label | Meaning | Example |
+| Label | Name | Meaning |
 |---:|---|---|
-| `0` | match / truthful / in-context | The caption describes the actual image. |
-| `1` | mismatch / falsified / out-of-context | The image is reused with a misleading caption or mismatched context. |
+| `0` | match / true / genuine | The image and text belong together. |
+| `1` | mismatch / fake / out-of-context | The image and text do not belong together, or the image is used misleadingly. |
 
-The project is called **EVE-RAG** because the intended method combines:
+The key challenge is that out-of-context misinformation is often subtle. The image and caption can be visually or semantically similar but still wrong because of mismatched:
 
-- **EVE**: entity verification and visual grounding
-- **RAG**: retrieval-augmented evidence reasoning
-- **CLIP / LoRA / MLLM**: multimodal representation learning and explanation
+- person,
+- location,
+- event,
+- date,
+- source,
+- context,
+- article evidence,
+- or entity grounding.
 
-The high-level idea is that simple image-text similarity is not enough. A fake/out-of-context pair can still look semantically similar. For example, both caption and image may mention "protest", "soldiers", or "politicians", while the actual person, location, date, or event differs.
+So the project is designed around multiple complementary streams.
 
-So the project investigates three main streams:
+## Main streams
 
-| Stream | Name | Core idea |
+| Stream | Name | Goal |
 |---|---|---|
-| Stream A | Entity verification | Extract named entities from text and compare them against visual/evidence cues. |
-| Stream B | CLIP / LoRA representation stream | Use CLIP-style multimodal embeddings, domain adaptation, and learned classifiers. |
-| Stream C | Evidence / stance stream | Retrieve or use external/contextual evidence and score whether it supports the caption-image pair. |
+| Stream A | Entity + visual grounding | Extract named entities from captions and test whether they are visually/evidentially grounded. |
+| Stream B | CLIP / representation learning | Use CLIP image-text embeddings and learned classifiers to detect mismatches. |
+| Stream C | Evidence / stance reasoning | Use external or metadata evidence to determine support/contradiction. |
+| Fusion | Multi-stream decision | Combine Stream A, B, and C into one final model. |
+| MLLM | Explanation generation | Use a multimodal language model to explain final predictions. |
 
-The final intended direction is a fusion model that combines these streams, followed by optional MLLM reasoning for explanations.
+The current strongest stream is **Stream B**, after fixing NewsCLIPpings to use real pre-extracted CLIP embeddings.
 
 ---
 
 # 2. Plan summary
 
-The old plan assumed the datasets and notebooks could directly read raw folders. That became messy because:
+The original project plan became outdated because the dataset layout changed and more VERITE/MMFakeBench images became available. The project was cleaned into a professional structure with a clear separation between raw data, processed data, caches, notebooks, and paper outputs.
 
-1. raw datasets had different formats,
-2. VERITE images were incomplete and duplicated across folders,
-3. NewsCLIPpings does not have local VisualNews images available,
-4. MMFakeBench has many nested image folders,
-5. notebooks used different hardcoded paths,
-6. caches and old figures/tables were produced from outdated paths.
-
-The new plan is:
+## Final plan
 
 1. Keep raw datasets unchanged under `data/raw/`.
-2. Build one professional processed dataset layer under `data/processed/ooc_pairs/`.
-3. Put all locally available processed images into one flat folder:
+2. Build a clean processed dataset under `data/processed/ooc_pairs/`.
+3. Put all local images into one flat processed folder:
    ```text
    data/processed/ooc_pairs/images/
    ```
-4. Store all labels, captions, IDs, source metadata, and image paths in CSV manifests:
+4. Store captions, labels, IDs, metadata, and paths in manifest CSVs:
    ```text
    data/processed/ooc_pairs/manifests/
    ```
-5. Keep train/val/test experiment split files later under:
+5. Store reproducible split ID files in:
    ```text
    data/splits/
    ```
-6. Update every notebook so it reads the manifest CSVs instead of manually scanning raw folders.
-7. Treat `pair_id` as the main row key and `image_id` as the processed image key.
-8. For NewsCLIPpings, use pre-extracted embeddings instead of local images.
-9. For VERITE and MMFakeBench, use local flat processed images.
-10. Rebuild Stream A/B/C outputs from this manifest layer.
+6. Update every notebook to use manifest CSVs rather than scanning raw folders.
+7. Store intermediate outputs in:
+   ```text
+   cache/
+   ```
+8. Store paper outputs in:
+   ```text
+   paper/figures/
+   paper/tables/
+   ```
+9. Use GPU whenever useful, especially for CLIP, sentence-transformer encoding, and neural training.
+10. Treat Stream C current version as an **offline metadata evidence baseline**, not final RAG.
+11. Move next to fusion using Stream A/B/C predictions and features.
 
-The project now has a clean separation:
+## Current status at a glance
 
-```text
-raw data      = original downloaded datasets
-processed     = normalized project dataset
-cache         = intermediate model features
-paper         = figures/tables/results
-notebooks     = experiments and analysis
-src           = reusable code
-```
+| Component | Status |
+|---|---|
+| Directory cleanup | Complete |
+| Flat processed image folder | Complete |
+| Manifest CSVs | Complete |
+| Split files | Complete |
+| Setup notebooks | Updated |
+| EDA notebook | Updated |
+| Stream A | Complete, weak but valid |
+| Stream B | Complete, fixed with real NewsCLIPpings embeddings |
+| Stream C | Complete as offline metadata baseline, scientifically weak |
+| Baselines | Complete |
+| Fusion | Next |
+| MLLM explanation | Later |
 
 ---
 
 # 3. Final directory structure
 
-The intended professional repo structure is:
+The intended repository structure is:
 
 ```text
 eve-rag/
+├── .env.example
 ├── .gitignore
 ├── README.md
 ├── GRAND_PLAN.md
 ├── requirements.txt
+├── eve-rag.code-workspace
+│
 ├── configs/
 │   ├── eve_rag.yaml
 │   ├── ablation_frozen_clip.yaml
@@ -129,6 +146,17 @@ eve-rag/
 ├── data/
 │   ├── raw/
 │   │   ├── newsclippings/
+│   │   │   ├── train.json
+│   │   │   ├── val.json
+│   │   │   ├── test.json
+│   │   │   ├── metadata/
+│   │   │   └── embeddings/
+│   │   │       ├── clip_image_embeddings/
+│   │   │       ├── clip_text_embeddings/
+│   │   │       ├── facenet_embeddings/
+│   │   │       ├── places_resnet50/
+│   │   │       └── sbert_embeddings/
+│   │   │
 │   │   ├── verite/
 │   │   │   └── image-text-verification/
 │   │   │       └── VERITE/
@@ -137,6 +165,7 @@ eve-rag/
 │   │   │           ├── VERITE_clip_image_embeddings_ViTL14.npy
 │   │   │           ├── VERITE_clip_text_embeddings_ViTL14.npy
 │   │   │           └── images/
+│   │   │
 │   │   └── mmfakebench/
 │   │       ├── MMFakeBench_val.json
 │   │       ├── MMFakeBench_test.json
@@ -165,7 +194,16 @@ eve-rag/
 │   │           └── manifest_summary.csv
 │   │
 │   ├── splits/
-│   │   └── future custom split files go here
+│   │   ├── train_pair_ids.txt
+│   │   ├── val_pair_ids.txt
+│   │   ├── test_pair_ids.txt
+│   │   ├── verite_test_pair_ids.txt
+│   │   ├── mmfakebench_val_pair_ids.txt
+│   │   ├── mmfakebench_test_pair_ids.txt
+│   │   ├── all_pair_ids.txt
+│   │   ├── local_image_pair_ids.txt
+│   │   ├── newsclippings_pair_ids.txt
+│   │   └── ood_pair_ids.txt
 │   │
 │   └── external/
 │       └── pretrained/
@@ -174,7 +212,8 @@ eve-rag/
 │   ├── stream_a/
 │   │   ├── ner/
 │   │   ├── visual_grounding/
-│   │   └── entity_scorer/
+│   │   ├── entity_scorer/
+│   │   └── results/
 │   │
 │   ├── stream_b/
 │   │   ├── clip_embeddings/
@@ -185,7 +224,8 @@ eve-rag/
 │   │
 │   ├── stream_c/
 │   │   ├── evidence/
-│   │   └── stance_scores/
+│   │   ├── stance_scores/
+│   │   └── results/
 │   │
 │   └── fusion/
 │
@@ -194,28 +234,29 @@ eve-rag/
 │   │
 │   ├── 01_setup/
 │   │   ├── env_check.ipynb
-│   │   ├── data_download.ipynb
+│   │   ├── data_setup.ipynb
 │   │   └── eda.ipynb
 │   │
 │   ├── 02_stream_a/
-│   │   ├── ner_pipeline_v2.ipynb
-│   │   ├── visual_grounding_v2.ipynb
-│   │   └── stream_a_results_v2_fixed.ipynb
+│   │   ├── ner_pipeline_v2_updated.ipynb
+│   │   ├── visual_grounding_v2_updated.ipynb
+│   │   ├── entity_scorer_v2_updated.ipynb
+│   │   └── stream_a_results_v2_updated.ipynb
 │   │
 │   ├── 03_stream_b/
-│   │   ├── clip_features.ipynb
-│   │   ├── lora_stage1.ipynb
-│   │   ├── lora_stage2_fixed.ipynb
-│   │   └── stream_b_results_fixed.ipynb
+│   │   ├── clip_features_updated.ipynb
+│   │   ├── lora_stage1_updated.ipynb
+│   │   ├── lora_stage2_fixed_updated.ipynb
+│   │   └── stream_b_results_fixed_updated.ipynb
 │   │
 │   ├── 04_stream_c/
-│   │   ├── evidence_retrieval_patch_fixed.ipynb
-│   │   ├── evidence_val_fix.ipynb
-│   │   ├── stance_scoring_fixed.ipynb
-│   │   └── stream_c_results_fixed.ipynb
+│   │   ├── evidence_retrieval_patch_fixed_updated.ipynb
+│   │   ├── evidence_val_fix_updated.ipynb
+│   │   ├── stance_scoring_fixed_updated.ipynb
+│   │   └── stream_c_results_fixed_updated.ipynb
 │   │
 │   ├── 05_fusion/
-│   │   ├── baselines_fixed.ipynb
+│   │   ├── baselines_fixed_updated.ipynb
 │   │   ├── fusion_module.ipynb
 │   │   └── fusion_training.ipynb
 │   │
@@ -245,7 +286,8 @@ eve-rag/
 │       └── paths.py
 │
 ├── scripts/
-│   └── build_dataset.py
+│   ├── build_dataset.py
+│   └── inspect_dataset_shapes.py
 │
 ├── experiments/
 │
@@ -254,9 +296,9 @@ eve-rag/
     └── tables/
 ```
 
-## Important path constants
+## Core path constants
 
-The file `src/utils/paths.py` should define:
+`src/utils/paths.py` should define:
 
 ```python
 from pathlib import Path
@@ -307,25 +349,27 @@ TABLES = PAPER / "tables"
 
 ---
 
-# 4. Dataset details and what we gained
+# 4. Dataset details and gains
 
-The project now uses three dataset sources:
+The project currently uses three dataset sources:
 
 1. **NewsCLIPpings**
 2. **VERITE**
 3. **MMFakeBench**
 
-The final normalized manifest layer has:
+## Final manifest counts
 
-| Manifest | Rows | Local image rows | Unique image IDs | Notes |
-|---|---:|---:|---:|---|
-| `train.csv` | 71,072 | 0 | 59,876 | NewsCLIPpings train; embedding-only |
-| `val.csv` | 7,024 | 0 | 5,943 | NewsCLIPpings validation; embedding-only |
-| `test.csv` | 7,264 | 0 | 6,147 | NewsCLIPpings test; embedding-only |
-| `verite_test.csv` | 1,001 | 621 | 495 | VERITE OOD test with partial local image coverage |
-| `mmfakebench_val.csv` | 1,000 | 1,000 | 1,000 | MMFakeBench validation |
-| `mmfakebench_test.csv` | 10,000 | 10,000 | 10,000 | MMFakeBench test |
-| `all.csv` | 97,361 | 11,621 | 83,461 | Union of all rows |
+| Manifest | Dataset | Rows | Local image rows | Unique image IDs | Notes |
+|---|---|---:|---:|---:|---|
+| `train.csv` | NewsCLIPpings | 71,072 | 0 | 59,876 | Embedding-only, real CLIP embeddings available |
+| `val.csv` | NewsCLIPpings | 7,024 | 0 | 5,943 | Embedding-only, real CLIP embeddings available |
+| `test.csv` | NewsCLIPpings | 7,264 | 0 | 6,147 | Embedding-only, real CLIP embeddings available |
+| `verite_test.csv` | VERITE | 1,001 | 621 | 495 | Partial local image coverage |
+| `mmfakebench_val.csv` | MMFakeBench | 1,000 | 1,000 | 1,000 | Full local image coverage |
+| `mmfakebench_test.csv` | MMFakeBench | 10,000 | 10,000 | 10,000 | Full local image coverage |
+| `all.csv` | Combined | 97,361 | 11,621 | 83,461 | Unified manifest |
+
+## Flat processed image folder
 
 The flat processed image folder contains:
 
@@ -336,21 +380,14 @@ data/processed/ooc_pairs/images/
 with:
 
 ```text
-11,495 image files
+11,495 actual image files
 ```
 
-The difference between local-image rows and image files is expected:
-
-```text
-11,621 rows with has_image = 1
-11,495 unique flat image files
-```
-
-This happens because VERITE reuses the same image across multiple caption/context rows.
+The difference between `11,621` local-image rows and `11,495` image files is expected because VERITE reuses the same image in multiple rows.
 
 ## Label distribution
 
-| Manifest | Label 0: match / true | Label 1: mismatch / OOC |
+| Manifest | Label 0: match | Label 1: mismatch/OOC |
 |---|---:|---:|
 | `train.csv` | 35,536 | 35,536 |
 | `val.csv` | 3,512 | 3,512 |
@@ -362,103 +399,31 @@ This happens because VERITE reuses the same image across multiple caption/contex
 
 ## What we gained
 
-### Before cleanup
+Before cleanup:
 
-The project had:
+- dataset folders were inconsistent,
+- VERITE had duplicated image folders,
+- only part of VERITE was downloaded,
+- notebooks hardcoded old paths,
+- MMFakeBench images were buried in nested folders,
+- NewsCLIPpings local images were missing,
+- Stream B initially used fake/hash NewsCLIP image vectors,
+- Stream C initially looked like evidence but was only metadata/caption similarity.
 
-- duplicated VERITE image locations,
-- incomplete VERITE image coverage,
-- raw datasets mixed directly with notebooks,
-- stale caches based on old paths,
-- output figures/tables generated from older assumptions,
-- no single normalized schema across datasets,
-- NewsCLIPpings, VERITE, and MMFakeBench each being handled differently.
+After cleanup:
 
-### After cleanup
-
-The project gained:
-
-1. **A single manifest schema** for all datasets.
-2. **A flat processed image folder** for all locally available images.
-3. **11,495 local images** available from VERITE + MMFakeBench.
-4. **97,361 normalized image-text pair rows** across all datasets.
-5. **11,621 rows with local image files**.
-6. **83,461 unique image IDs** across all manifests.
-7. **0 broken image paths** in the processed manifests.
-8. A clean distinction between:
-   - raw data,
-   - processed data,
-   - caches,
-   - paper outputs,
-   - notebooks,
-   - source code.
-9. A beginner-friendly dataset entry point: the CSV files in `data/processed/ooc_pairs/manifests/`.
-
-## Dataset-specific details
-
-### NewsCLIPpings
-
-NewsCLIPpings contributes the main in-domain train/validation/test split:
-
-| Split | Rows | Class balance | Local images |
-|---|---:|---|---|
-| Train | 71,072 | 50/50 | No |
-| Validation | 7,024 | 50/50 | No |
-| Test | 7,264 | 50/50 | No |
-
-NewsCLIPpings local VisualNews images are unavailable in the current project, so `has_image = 0` for all NewsCLIPpings rows. This is not an error.
-
-Instead, the manifest keeps:
-
-- `raw_image_path`
-- `source_image_id`
-- `clip_image_key`
-- `clip_text_key`
-
-These keys allow notebooks to use pre-extracted embeddings.
-
-### VERITE
-
-VERITE contributes an out-of-domain test set:
-
-| Rows | Local image rows | Unique local images | Labels |
-|---:|---:|---:|---|
-| 1,001 | 621 | 495 | 338 true, 663 OOC/miscaptioned |
-
-VERITE originally had image paths like:
-
-```text
-images/true_0.jpg
-images/false_0.jpg
-```
-
-Those are preserved in `raw_image_path`, while the processed manifest points to flat processed names such as:
-
-```text
-data/processed/ooc_pairs/images/verite_true_0.jpg
-```
-
-### MMFakeBench
-
-MMFakeBench contributes a large OOD validation/test set:
-
-| Split | Rows | Local image rows | Labels |
-|---|---:|---:|---|
-| Validation | 1,000 | 1,000 | 300 real, 700 fake |
-| Test | 10,000 | 10,000 | 3,000 real, 7,000 fake |
-
-The original MMFakeBench paths are nested, for example:
-
-```text
-/real/bbc_test_500/bbc_test_0.png
-/fake/antifact_image_generation_test_500/...
-```
-
-The processed dataset copies those into the flat image folder with unique names, for example:
-
-```text
-data/processed/ooc_pairs/images/mmfakebench_test_real_bbc_test_500_bbc_test_0.png
-```
+| Gain | Details |
+|---|---|
+| Unified manifests | Every dataset now uses the same schema. |
+| Flat image folder | All local images are copied into one folder with unique names. |
+| 97,361 pair rows | Combined normalized dataset size. |
+| 11,621 rows with local images | VERITE + MMFakeBench local-image rows. |
+| 11,495 image files | Unique local processed images. |
+| Real NewsCLIP embeddings | NewsCLIPpings now uses real CLIP image/text PKLs. |
+| 0 broken image paths | Processed manifests validate cleanly. |
+| Reproducible splits | `data/splits/` contains row ID lists. |
+| Stream cache cleanup | Outputs organized under `cache/stream_a`, `cache/stream_b`, `cache/stream_c`. |
+| Better Stream B | NewsCLIP test improved after real embedding fix. |
 
 ---
 
@@ -466,111 +431,98 @@ data/processed/ooc_pairs/images/mmfakebench_test_real_bbc_test_500_bbc_test_0.pn
 
 ## Why preprocessing was needed
 
-The raw datasets do not share the same structure:
+Each dataset has a different structure.
 
-| Dataset | Raw issue |
-|---|---|
-| NewsCLIPpings | Has captions and IDs, but local VisualNews images are unavailable. |
-| VERITE | CSV references `true_*` and `false_*` image names; downloaded images were partial and duplicated. |
-| MMFakeBench | Images exist but are deeply nested under real/fake and subtype folders. |
+| Dataset | Raw format issue | Solution |
+|---|---|---|
+| NewsCLIPpings | JSON + metadata + embeddings; no local VisualNews images | Use real pre-extracted embeddings and manifest keys |
+| VERITE | CSV references `images/true_*.jpg` / `images/false_*.jpg`; partial downloaded images | Resolve local images and copy to flat processed folder |
+| MMFakeBench | JSON files with nested image folders | Copy images to flat processed folder with unique names |
 
-So the project now uses a **processed manifest layer**.
+## Processed manifest schema
 
-## Final processed schema
-
-All CSV files under `data/processed/ooc_pairs/manifests/` use this schema:
+All manifest CSVs use this normalized schema:
 
 | Column | Meaning |
 |---|---|
-| `pair_id` | Unique ID for an image-text pair row. |
-| `dataset` | Dataset source: `newsclippings`, `verite`, or `mmfakebench`. |
-| `split` | Split name: `train`, `val`, or `test`. |
-| `image_id` | Unique image key in the processed dataset. |
-| `image_path` | Path to processed local image if `has_image = 1`; blank otherwise. |
-| `raw_image_path` | Original dataset image path/reference. |
-| `has_image` | `1` if local processed image exists, else `0`. |
-| `caption` | Text/caption/context for the pair. |
-| `label` | `0` for match, `1` for mismatch/OOC. |
-| `label_name` | Human-readable label: `match` or `mismatch`. |
-| `source_image_id` | Original image identifier from the source dataset. |
-| `source_text_id` | Original text/caption identifier if available. |
-| `original_id` | Dataset-specific original row/id. |
-| `clip_image_key` | Key used to retrieve pre-extracted image embeddings. |
-| `clip_text_key` | Key used to retrieve pre-extracted text embeddings. |
-| `text_source` | MMFakeBench text source if available. |
-| `image_source` | MMFakeBench image source if available. |
-| `fake_cls` | MMFakeBench fake subtype if available. |
-| `topic` | NewsCLIPpings topic if available. |
-| `source` | NewsCLIPpings news source if available. |
-| `timestamp` | NewsCLIPpings timestamp if available. |
-| `title` | NewsCLIPpings article title if available. |
-| `raw_label` | Original label from the source dataset. |
-| `notes` | Explanation of special handling. |
+| `pair_id` | Unique image-text pair ID |
+| `dataset` | Dataset name |
+| `split` | Split name |
+| `image_id` | Unique processed image ID |
+| `image_path` | Processed local image path if available |
+| `raw_image_path` | Original dataset image path/reference |
+| `has_image` | `1` if processed local image exists, else `0` |
+| `caption` | Text/caption/context |
+| `label` | `0` match, `1` mismatch/OOC |
+| `label_name` | Human-readable label |
+| `source_image_id` | Source dataset image ID |
+| `source_text_id` | Source dataset text ID |
+| `original_id` | Original row/item ID |
+| `clip_image_key` | Key for CLIP image embeddings |
+| `clip_text_key` | Key for CLIP text embeddings |
+| `text_source` | MMFakeBench text source |
+| `image_source` | MMFakeBench image source |
+| `fake_cls` | MMFakeBench fake subtype |
+| `topic` | NewsCLIPpings topic |
+| `source` | NewsCLIPpings news source |
+| `timestamp` | NewsCLIPpings timestamp |
+| `title` | NewsCLIPpings title |
+| `raw_label` | Original source label |
+| `notes` | Notes about row handling |
 
-## Dataset build notebook
+## Dataset processing notebook
 
-The dataset build notebook is:
+The official dataset builder is:
 
 ```text
 notebooks/00_make_flat_processed_dataset.ipynb
 ```
 
-It does the following:
+or the updated setup equivalent:
 
-1. Cleans old processed images/manifests/reports.
-2. Reads raw NewsCLIPpings JSON files.
-3. Reads NewsCLIPpings metadata JSON files.
-4. Reads VERITE CSV and raw image folder.
-5. Reads MMFakeBench JSON files and image folders.
-6. Normalizes all rows into the common schema.
-7. Copies local VERITE and MMFakeBench images into a **single flat processed image folder**.
-8. Writes manifest CSVs.
-9. Writes a validation summary.
-10. Confirms broken image paths are `0`.
+```text
+notebooks/01_setup/data_setup.ipynb
+```
 
-## Why images are flat
+It does:
 
-The current processed image folder intentionally has no dataset subfolders.
+1. reads raw NewsCLIPpings JSON and metadata,
+2. reads raw VERITE CSV and image folder,
+3. reads raw MMFakeBench JSON and image folders,
+4. creates one normalized manifest schema,
+5. copies local images into the flat processed folder,
+6. writes manifest CSVs,
+7. writes split ID files,
+8. validates image paths,
+9. writes `manifest_summary.csv`.
 
-This is the preferred current design:
+## Why processed images are flat
+
+The current design intentionally avoids nested processed image folders.
+
+Instead of:
+
+```text
+images/mmfakebench/test/fake/...
+images/verite/...
+```
+
+we use:
 
 ```text
 data/processed/ooc_pairs/images/
-├── verite_true_0.jpg
-├── verite_false_0.jpg
-├── mmfakebench_test_real_bbc_test_500_bbc_test_0.png
-├── mmfakebench_val_real_bbc_val_50_BBC_val_0.png
-└── ...
 ```
 
-Why this works:
-
-- every copied file receives a unique prefix,
-- the manifest stores the exact image path,
-- image IDs prevent collisions,
-- notebooks do not need to know raw dataset folder structures.
-
-## Future split design
-
-For now, the canonical split information is inside the manifests. Later, if needed, experiment-specific split files can be placed in:
+with unique names such as:
 
 ```text
-data/splits/
+verite_true_0.jpg
+verite_false_0.jpg
+mmfakebench_test_real_bbc_test_500_bbc_test_0.png
+mmfakebench_test_fake_antifact_image_generation_test_500_coco_antifact_image_edit_test_md_1.png
 ```
 
-For example:
-
-```text
-data/splits/
-├── newsclip_train_ids.txt
-├── newsclip_val_ids.txt
-├── newsclip_test_ids.txt
-├── ood_verite_ids.txt
-├── ood_mmfakebench_val_ids.txt
-└── ood_mmfakebench_test_ids.txt
-```
-
-But this is optional because the manifest CSVs already contain the `split` column.
+This works because the manifest stores exact image paths and IDs.
 
 ---
 
@@ -580,671 +532,567 @@ Status legend:
 
 | Status | Meaning |
 |---|---|
-| ✅ Done | Notebook exists and produced outputs earlier. |
-| 🟡 Needs rerun | Notebook exists but must be rerun after the new processed manifest layer. |
-| 🔴 Pending | Notebook exists as planned but not confirmed complete. |
-| 🧹 Cleanup / migration | Main task is path cleanup and manifest integration. |
+| ✅ Complete | Ran successfully and outputs exist. |
+| 🟡 Complete but weak/baseline | Technically valid but scientifically limited. |
+| 🔴 Pending | Still not implemented or not rerun after cleanup. |
+| 🧹 Updated | Updated to new manifest structure. |
 
-## Dataset / setup notebooks
+## Setup notebooks
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `notebooks/00_make_flat_processed_dataset.ipynb` | ✅ Done | Built the flat processed dataset and manifests. |
-| `notebooks/01_setup/env_check.ipynb` | 🟡 Needs rerun | Should check new `src/utils/paths.py` and manifest files. |
-| `notebooks/01_setup/data_download.ipynb` | 🧹 Cleanup / migration | Should be updated to avoid old duplicate VERITE paths. |
-| `notebooks/01_setup/eda.ipynb` | 🟡 Needs rerun | Should use processed manifests and output new summary tables. |
+| `env_check.ipynb` | ✅ Complete | Checks Python, GPU, paths, manifests, image folder |
+| `data_setup.ipynb` | ✅ Complete | Builds manifests, flat images, split files |
+| `eda.ipynb` | ✅ Complete | Fixed `savefig()` issue and uses processed manifests |
 
 ## Stream A notebooks
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `notebooks/02_stream_a/ner_pipeline_v2.ipynb` | 🟡 Needs rerun | Should read captions from processed manifests. |
-| `notebooks/02_stream_a/visual_grounding_v2.ipynb` | 🟡 Needs path update + rerun | Must use `has_image = 1` and processed `image_path`. |
-| `notebooks/02_stream_a/stream_a_results_v2_fixed.ipynb` | 🟡 Needs rerun | Depends on updated NER and visual grounding caches. |
+| `ner_pipeline_v2_updated.ipynb` | ✅ Complete | NER cached for all rows |
+| `visual_grounding_v2_updated.ipynb` | ✅ Complete | CLIP grounding for local-image rows |
+| `entity_scorer_v2_updated.ipynb` | ✅ Complete | Feature table built for all rows |
+| `stream_a_results_v2_updated.ipynb` | 🟡 Complete but weak | Entity-only stream underperforms majority on OOD |
 
 ## Stream B notebooks
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `notebooks/03_stream_b/clip_features.ipynb` | 🟡 Needs path update + rerun | Should use processed manifests and flat images where available. |
-| `notebooks/03_stream_b/lora_stage1.ipynb` | 🟡 Needs rerun | Depends on updated feature preparation. |
-| `notebooks/03_stream_b/lora_stage2_fixed.ipynb` | 🟡 Needs rerun | Must rebuild OOD embeddings using new manifest paths. |
-| `notebooks/03_stream_b/stream_b_results_fixed.ipynb` | 🟡 Needs rerun | Should regenerate Stream B tables/figures after dataset cleanup. |
+| `clip_features_updated.ipynb` | ✅ Complete | Fixed to use real NewsCLIPpings embeddings |
+| `lora_stage1_updated.ipynb` | ✅ Complete | Stage 1 representation/classifier training |
+| `lora_stage2_fixed_updated.ipynb` | ✅ Complete | Stage 2 evaluation and predictions |
+| `stream_b_results_fixed_updated.ipynb` | ✅ Complete | Best stream so far |
 
 ## Stream C notebooks
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `notebooks/04_stream_c/evidence_retrieval_patch_fixed.ipynb` | 🟡 Needs rerun | Should use `pair_id`, `caption`, and manifest rows. |
-| `notebooks/04_stream_c/evidence_val_fix.ipynb` | 🟡 Needs check | Keep only if validation evidence cache needs repair. |
-| `notebooks/04_stream_c/stance_scoring_fixed.ipynb` | 🟡 Needs rerun | Should score rows from processed manifests. |
-| `notebooks/04_stream_c/stream_c_results_fixed.ipynb` | 🟡 Needs rerun | Should regenerate Stream C summary after path cleanup. |
+| `evidence_retrieval_patch_fixed_updated.ipynb` | 🟡 Complete but baseline | Offline metadata evidence builder |
+| `evidence_val_fix_updated.ipynb` | ✅ Complete | Evidence row validation/repair |
+| `stance_scoring_fixed_updated.ipynb` | 🟡 Complete but baseline | Caption/evidence similarity; not true retrieval |
+| `stream_c_results_fixed_updated.ipynb` | 🟡 Complete but weak | Current Stream C is not final RAG |
+| `baselines_fixed_updated.ipynb` | ✅ Complete | Baseline and stream summary tables |
 
-## Fusion notebooks
-
-| Notebook | Status | Notes |
-|---|---|---|
-| `notebooks/05_fusion/baselines_fixed.ipynb` | 🔴 Pending / not recently verified | Should use unified manifest IDs for baselines. |
-| `notebooks/05_fusion/fusion_module.ipynb` | 🔴 Pending / not recently verified | Builds fusion architecture. |
-| `notebooks/05_fusion/fusion_training.ipynb` | 🔴 Pending / not recently verified | Trains cross-stream fusion. |
-
-## MLLM notebooks
+## Fusion / evaluation / MLLM
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `notebooks/06_mllm/qwen_finetune.ipynb` | 🔴 Pending / not recently verified | Intended LoRA fine-tuning for Qwen-style MLLM. |
-| `notebooks/06_mllm/mllm_inference.ipynb` | 🔴 Pending / not recently verified | Intended MLLM inference/explanation. |
-| `notebooks/06_mllm/chain_of_thought.ipynb` | 🔴 Pending / not recently verified | Intended explanation prompting and CoT-style outputs. |
-
-## Evaluation notebooks
-
-| Notebook | Status | Notes |
-|---|---|---|
-| `notebooks/07_eval/newsclippings_eval.ipynb` | 🔴 Pending / not recently verified | Should evaluate in-domain NewsCLIPpings. |
-| `notebooks/07_eval/cross_dataset_eval.ipynb` | 🔴 Pending / not recently verified | Should evaluate VERITE and MMFakeBench OOD. |
-| `notebooks/07_eval/ablations.ipynb` | 🔴 Pending / not recently verified | Should run ablation configs. |
-| `notebooks/07_eval/qualitative_analysis.ipynb` | 🔴 Pending / not recently verified | Should collect qualitative examples. |
-
-## Paper notebooks
-
-| Notebook | Status | Notes |
-|---|---|---|
-| `notebooks/08_paper/figures.ipynb` | 🟡 Needs rerun after results refresh | Generates paper figures. |
-| `notebooks/08_paper/tables.ipynb` | 🟡 Needs rerun after results refresh | Generates paper tables. |
-| `notebooks/08_paper/explanation_eval.ipynb` | 🔴 Pending / not recently verified | Intended explanation quality analysis. |
+| `fusion_module.ipynb` | 🔴 Pending | Next major step |
+| `fusion_training.ipynb` | 🔴 Pending | Should combine Stream A/B/C outputs |
+| `newsclippings_eval.ipynb` | 🔴 Pending | Formal eval notebook |
+| `cross_dataset_eval.ipynb` | 🔴 Pending | OOD eval for VERITE/MMFakeBench |
+| `ablations.ipynb` | 🔴 Pending | Ablation configs |
+| `qualitative_analysis.ipynb` | 🔴 Pending | Human-readable examples |
+| `qwen_finetune.ipynb` | 🔴 Pending | MLLM fine-tuning |
+| `mllm_inference.ipynb` | 🔴 Pending | Explanation generation |
 
 ---
 
 # 7. Notebook summaries
 
-## `00_make_flat_processed_dataset.ipynb`
-
-Builds the normalized dataset layer.
-
-Main jobs:
-
-- reads raw NewsCLIPpings,
-- reads raw VERITE,
-- reads raw MMFakeBench,
-- creates processed manifests,
-- copies available images into the flat image folder,
-- validates image paths,
-- writes `manifest_summary.csv`.
-
-This is now the first notebook a beginner should understand.
-
 ## `env_check.ipynb`
 
-Checks that:
+Checks:
 
-- Python environment works,
-- important dependencies are installed,
-- GPU/CUDA availability is known,
-- repo paths are valid,
-- `src/utils/paths.py` imports successfully,
-- processed manifests exist.
+- Python version,
+- CUDA availability,
+- GPU name and VRAM,
+- root path detection,
+- `src.utils.paths` imports,
+- manifest existence,
+- flat image folder existence,
+- split file existence,
+- cache/paper folders.
 
-Should be updated to check:
+This notebook should be run before and after setup.
 
-```python
-from src.utils.paths import ALL_MANIFEST, PROCESSED_IMAGES
-```
+## `data_setup.ipynb`
 
-## `data_download.ipynb`
+Builds the canonical dataset layer.
 
-Originally handled dataset download/setup. It should now be treated mostly as a raw-data setup notebook.
-
-It should not create old folders like:
-
-```text
-data/verite/images/
-```
-
-The canonical raw VERITE image folder is:
+Outputs:
 
 ```text
-data/raw/verite/image-text-verification/VERITE/images/
+data/processed/ooc_pairs/images/
+data/processed/ooc_pairs/manifests/
+data/processed/ooc_pairs/reports/
+data/splits/
 ```
+
+This is the most important setup notebook.
 
 ## `eda.ipynb`
 
-Exploratory data analysis.
+Reads processed manifests and generates:
 
-Should produce:
+- dataset count tables,
+- class balance tables,
+- image coverage summary,
+- caption length analysis,
+- fake class distribution,
+- paper figures and tables.
 
-- class balance,
-- dataset row counts,
-- local image coverage,
-- caption length distributions,
-- NewsCLIPpings metadata checks,
-- VERITE label distribution,
-- MMFakeBench fake class distribution.
+## `ner_pipeline_v2_updated.ipynb`
 
-## `ner_pipeline_v2.ipynb`
+Extracts named entities from captions.
 
-Stream A notebook.
-
-Extracts named entities from captions, such as:
-
-- people,
-- locations,
-- organizations,
-- dates,
-- geopolitical entities.
-
-Should now read captions from:
+Outputs:
 
 ```text
-data/processed/ooc_pairs/manifests/*.csv
+cache/stream_a/ner/entities_all.pkl
+cache/stream_a/ner/entities_newsclippings_train.pkl
+cache/stream_a/ner/entities_newsclippings_val.pkl
+cache/stream_a/ner/entities_newsclippings_test.pkl
+cache/stream_a/ner/entities_verite_test.pkl
+cache/stream_a/ner/entities_mmfakebench_val.pkl
+cache/stream_a/ner/entities_mmfakebench_test.pkl
 ```
 
-and save caches under:
+It uses spaCy if available, otherwise a fallback regex NER.
+
+## `visual_grounding_v2_updated.ipynb`
+
+Computes CLIP-based image/entity grounding for rows with local images.
+
+Outputs:
 
 ```text
-cache/stream_a/ner/
+cache/stream_a/visual_grounding/vg_scores_all.pkl
+cache/stream_a/visual_grounding/caption_clip_sim_all.pkl
+cache/stream_a/visual_grounding/clip_image_embs_processed.pkl
+cache/stream_a/visual_grounding/clip_entity_prompt_embs.pkl
 ```
 
-## `visual_grounding_v2.ipynb`
+## `entity_scorer_v2_updated.ipynb`
 
-Stream A notebook.
+Converts NER and visual grounding results into tabular features.
 
-Compares text entities or caption-level semantics with visual information. It should only operate on rows where:
-
-```python
-has_image == 1
-```
-
-The image path should come from:
-
-```python
-row["image_path"]
-```
-
-not from raw dataset folders.
-
-## `stream_a_results_v2_fixed.ipynb`
-
-Combines Stream A features into predictions and evaluation.
-
-Expected outputs include:
-
-- entity scorer features,
-- Stream A predictions,
-- Stream A confusion matrix,
-- Stream A ROC curve,
-- Stream A summary bar chart,
-- Stream A result CSVs.
-
-## `clip_features.ipynb`
-
-Stream B notebook.
-
-Builds or loads multimodal features such as:
-
-- CLIP image embeddings,
-- CLIP text embeddings,
-- SBERT text embeddings,
-- FaceNet embeddings,
-- Places/scene embeddings.
-
-For NewsCLIPpings, it should use pre-extracted embedding keys. For VERITE and MMFakeBench, it can use processed flat image paths.
-
-## `lora_stage1.ipynb`
-
-Stream B notebook.
-
-Stage 1 domain adaptation.
-
-Expected role:
-
-- adapt CLIP-like features to the news/OOC domain,
-- train a model on NewsCLIPpings train/val,
-- save stage 1 weights and feature outputs.
-
-## `lora_stage2_fixed.ipynb`
-
-Stream B notebook.
-
-Stage 2 OOC classification.
-
-Expected role:
-
-- train OOC classifier on feature representations,
-- evaluate on NewsCLIPpings,
-- produce OOD embeddings for VERITE/MMFakeBench,
-- save stage 2 outputs.
-
-## `stream_b_results_fixed.ipynb`
-
-Stream B reporting notebook.
-
-Expected outputs:
-
-- Stream B accuracy table,
-- ROC curve,
-- confusion matrix,
-- score distributions,
-- t-SNE visualization,
-- summary bar chart.
-
-## `evidence_retrieval_patch_fixed.ipynb`
-
-Stream C notebook.
-
-Retrieves or prepares evidence for each caption/image pair.
-
-Expected evidence could include:
-
-- search snippets,
-- article evidence,
-- retrieved visual-context evidence,
-- cached evidence text.
-
-Should use `pair_id` for caching.
-
-## `evidence_val_fix.ipynb`
-
-Utility notebook for fixing validation evidence cache issues.
-
-Keep this notebook only if evidence retrieval produces broken/partial val caches.
-
-## `stance_scoring_fixed.ipynb`
-
-Stream C notebook.
-
-Scores whether retrieved evidence supports or contradicts the image-caption pair.
-
-Expected outputs:
-
-- raw evidence cache,
-- stance scores,
-- support/contradiction features.
-
-## `stream_c_results_fixed.ipynb`
-
-Stream C reporting notebook.
-
-Expected outputs:
-
-- stance score distributions,
-- evidence distributions,
-- feature importance,
-- Stream C summary results.
-
-## Fusion notebooks
-
-The fusion notebooks are intended to combine Stream A, Stream B, and Stream C.
-
-Planned logic:
+Outputs:
 
 ```text
-Stream A features
-+ Stream B features
-+ Stream C features
-→ fusion model
-→ final OOC prediction
+cache/stream_a/entity_scorer/features_all.csv
+cache/stream_a/entity_scorer/features_all.pkl
 ```
 
-Possible fusion approaches:
+## `stream_a_results_v2_updated.ipynb`
 
-- simple weighted average,
-- MLP fusion,
-- cross-attention fusion,
-- late fusion,
-- calibration layer.
+Trains/evaluates a Stream A classifier from entity/grounding features.
 
-## MLLM notebooks
+Current result: valid but weak.
 
-The MLLM notebooks are intended to generate explanations.
+## `clip_features_updated.ipynb`
 
-The long-term target is:
+Builds Stream B CLIP-derived features.
+
+Important fix:
+
+- NewsCLIPpings now uses real PKL embeddings:
+  ```text
+  data/raw/newsclippings/embeddings/clip_image_embeddings/
+  data/raw/newsclippings/embeddings/clip_text_embeddings/
+  ```
+- VERITE/MMFakeBench use OpenCLIP image/text embeddings from local processed images.
+
+Outputs:
 
 ```text
-image + caption + stream scores + evidence
-→ MLLM reasoning
-→ OOC/match decision + explanation
+cache/stream_b/clip_embeddings/
+cache/stream_b/features/clip_features_all.csv
 ```
 
-The explanation should ideally say which entity, event, location, or context caused the mismatch.
+## `lora_stage1_updated.ipynb`
+
+Trains Stage 1 representation/classifier model on Stream B features.
+
+Outputs:
+
+```text
+cache/stream_b/lora_stage1/stage1_model.pt
+cache/stream_b/lora_stage1/stage1_scores_all.csv
+cache/stream_b/lora_stage1/stage1_history.csv
+```
+
+## `lora_stage2_fixed_updated.ipynb`
+
+Trains/evaluates Stage 2 classifier.
+
+Outputs:
+
+```text
+cache/stream_b/lora_stage2/stage2_model.pkl
+cache/stream_b/final/stream_b_predictions.csv
+cache/stream_b/final/stream_b_final_features.csv
+paper/tables/stream_b_results.csv
+```
+
+## `stream_b_results_fixed_updated.ipynb`
+
+Creates Stream B figures and summary tables.
+
+Stream B is currently the strongest stream.
+
+## `evidence_retrieval_patch_fixed_updated.ipynb`
+
+Builds offline evidence text from manifest metadata.
+
+Important: this is not true web retrieval yet.
+
+Outputs:
+
+```text
+cache/stream_c/evidence/raw_evidence_all.csv
+```
+
+## `evidence_val_fix_updated.ipynb`
+
+Checks and repairs missing evidence rows.
+
+## `stance_scoring_fixed_updated.ipynb`
+
+Computes caption/evidence similarity.
+
+Uses SentenceTransformers on GPU if installed, otherwise TF-IDF.
+
+Outputs:
+
+```text
+cache/stream_c/stance_scores/stream_c_stance_scores_all.csv
+```
+
+## `stream_c_results_fixed_updated.ipynb`
+
+Trains/evaluates Stream C classifier.
+
+Current version is weak because evidence is metadata-derived and partly circular.
+
+## `baselines_fixed_updated.ipynb`
+
+Computes:
+
+- majority baseline,
+- always-match baseline,
+- always-mismatch baseline,
+- CLIP cosine rank baseline,
+- combined stream/baseline table.
 
 ---
 
-# 8. Outputs: tables and figures
+# 8. Output tables and figures
 
-The paper output folders are:
+The paper folders are:
 
 ```text
 paper/figures/
 paper/tables/
 ```
 
-When this repository is uploaded to GitHub, figures can be embedded using relative paths.
-
-Example:
+When uploaded to GitHub, figures can be embedded with relative paths:
 
 ```markdown
 ![All Streams Summary](paper/figures/all_streams_summary_bar.png)
 ```
 
-or using the GitHub URL:
+or full GitHub URLs:
 
 ```markdown
 ![All Streams Summary](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/all_streams_summary_bar.png)
 ```
 
-## Key figures currently expected
+## Key figures
 
-### Overall / all-stream figures
+### All streams
 
-| Figure | Path | Purpose |
-|---|---|---|
-| All streams summary | `paper/figures/all_streams_summary_bar.png` | Compares Stream A/B/C/fusion if available. |
+| Figure | Path |
+|---|---|
+| All streams summary | `paper/figures/all_streams_summary_bar.png` |
 
 ![All Streams Summary](paper/figures/all_streams_summary_bar.png)
 
-### EDA figures
+### EDA
 
-| Figure | Path | Purpose |
-|---|---|---|
-| Class balance | `paper/figures/eda_class_balance.png` | Shows label distribution. |
-| CLIP similarity | `paper/figures/eda_clip_similarity.png` | Shows image-text similarity distribution. |
-| OOC subtypes | `paper/figures/eda_ooc_subtypes.png` | Shows subtype/category distribution. |
+| Figure | Path |
+|---|---|
+| EDA class balance | `paper/figures/eda_class_balance_processed.png` |
+| EDA caption length | `paper/figures/eda_caption_length_processed.png` |
+| EDA local image coverage | `paper/figures/eda_image_coverage_processed.png` |
 
-![Class Balance](paper/figures/eda_class_balance.png)
+![EDA Class Balance](paper/figures/eda_class_balance_processed.png)
 
-![CLIP Similarity](paper/figures/eda_clip_similarity.png)
+![EDA Caption Length](paper/figures/eda_caption_length_processed.png)
 
-![OOC Subtypes](paper/figures/eda_ooc_subtypes.png)
+![EDA Image Coverage](paper/figures/eda_image_coverage_processed.png)
 
-### NER / entity figures
+### Stream A
 
-| Figure | Path | Purpose |
-|---|---|---|
-| Entity count histogram | `paper/figures/ner_entity_count_histogram.png` | Shows number of entities per caption. |
-| Entity distribution | `paper/figures/ner_entity_distribution.png` | Shows entity type distribution. |
-| Entity OOC vs genuine | `paper/figures/ner_entity_ooc_vs_genuine.png` | Compares entity richness by class. |
-
-![NER Entity Count Histogram](paper/figures/ner_entity_count_histogram.png)
-
-![NER Entity Distribution](paper/figures/ner_entity_distribution.png)
-
-![NER Entity OOC vs Genuine](paper/figures/ner_entity_ooc_vs_genuine.png)
-
-### Visual grounding figures
-
-| Figure | Path | Purpose |
-|---|---|---|
-| VG score distribution | `paper/figures/vg_score_distribution.png` | Distribution of visual grounding scores. |
-| VG OOC vs genuine | `paper/figures/vg_score_ooc_vs_genuine.png` | Visual grounding separation by class. |
-
-![VG Score Distribution](paper/figures/vg_score_distribution.png)
-
-![VG OOC vs Genuine](paper/figures/vg_score_ooc_vs_genuine.png)
-
-### Entity scorer figures
-
-| Figure | Path | Purpose |
-|---|---|---|
-| Feature distributions | `paper/figures/entity_scorer_feature_distributions.png` | Stream A feature distributions. |
-| Entity scorer ROC | `paper/figures/entity_scorer_roc.png` | Entity scorer ROC curve. |
-
-![Entity Scorer Feature Distributions](paper/figures/entity_scorer_feature_distributions.png)
-
-![Entity Scorer ROC](paper/figures/entity_scorer_roc.png)
-
-### Stream A figures
-
-| Figure | Path | Purpose |
-|---|---|---|
-| Stream A confusion | `paper/figures/stream_a_confusion.png` | Stream A confusion matrix. |
-| Stream A feature heatmap | `paper/figures/stream_a_feature_heatmap.png` | Feature correlation/importance. |
-| Stream A ROC | `paper/figures/stream_a_roc.png` | Stream A ROC curve. |
-| Stream A summary | `paper/figures/stream_a_summary_bar.png` | Stream A metrics summary. |
+| Figure | Path |
+|---|---|
+| Stream A summary | `paper/figures/stream_a_summary_bar.png` |
+| Stream A MMFakeBench confusion | `paper/figures/stream_a_confusion_mmfakebench_test.png` |
+| Stream A VERITE confusion | `paper/figures/stream_a_confusion_verite_test_local.png` |
+| Stream A MMFakeBench ROC | `paper/figures/stream_a_roc_mmfakebench_test.png` |
+| Stream A VERITE ROC | `paper/figures/stream_a_roc_verite_test_local.png` |
 
 ![Stream A Summary](paper/figures/stream_a_summary_bar.png)
 
-![Stream A ROC](paper/figures/stream_a_roc.png)
+### Stream B
 
-![Stream A Confusion](paper/figures/stream_a_confusion.png)
-
-### Stream B figures
-
-| Figure | Path | Purpose |
-|---|---|---|
-| Stream B confusion | `paper/figures/stream_b_confusion.png` | Stream B confusion matrix. |
-| LoRA stage 1 training | `paper/figures/stream_b_lora_stage1_training.png` | Stage 1 training curves. |
-| LoRA stage 2 training | `paper/figures/stream_b_lora_stage2_training.png` | Stage 2 training curves. |
-| Stream B ROC | `paper/figures/stream_b_roc.png` | Stream B ROC curve. |
-| Score distributions | `paper/figures/stream_b_score_distributions.png` | Stream B score distributions. |
-| Stream B summary | `paper/figures/stream_b_summary_bar.png` | Stream B metric summary. |
-| Stream B t-SNE | `paper/figures/stream_b_tsne.png` | Feature space visualization. |
+| Figure | Path |
+|---|---|
+| Stream B summary | `paper/figures/stream_b_summary_bar.png` |
+| Stream B NewsCLIP ROC | `paper/figures/stream_b_roc_newsclippings_test.png` |
+| Stream B MMFakeBench ROC | `paper/figures/stream_b_roc_mmfakebench_test.png` |
+| Stream B VERITE ROC | `paper/figures/stream_b_roc_verite_test_local.png` |
+| Stream B score distribution | `paper/figures/stream_b_score_distribution_newsclippings_test.png` |
 
 ![Stream B Summary](paper/figures/stream_b_summary_bar.png)
 
-![Stream B ROC](paper/figures/stream_b_roc.png)
+### Stream C
 
-![Stream B t-SNE](paper/figures/stream_b_tsne.png)
+| Figure | Path |
+|---|---|
+| Stream C summary | `paper/figures/stream_c_summary_bar.png` |
+| Stream C confusion | `paper/figures/stream_c_confusion_newsclippings_test.png` |
+| Stream C ROC | `paper/figures/stream_c_roc_newsclippings_test.png` |
 
-### Stream C figures
+![Stream C Summary](paper/figures/stream_c_summary_bar.png)
 
-| Figure | Path | Purpose |
+## Key tables
+
+| Table | Path | Description |
 |---|---|---|
-| Evidence distributions | `paper/figures/stream_c_evidence_distributions.png` | Distribution of evidence features. |
-| Feature importance | `paper/figures/stream_c_feature_importance.png` | Stream C feature importance. |
-| Stance distributions | `paper/figures/stream_c_stance_distributions.png` | Support/contradiction score distributions. |
-
-![Stream C Evidence Distributions](paper/figures/stream_c_evidence_distributions.png)
-
-![Stream C Feature Importance](paper/figures/stream_c_feature_importance.png)
-
-![Stream C Stance Distributions](paper/figures/stream_c_stance_distributions.png)
-
-## Key tables currently expected
-
-| Table | Path | Purpose |
-|---|---|---|
-| Dataset summary | `paper/tables/dataset_summary.csv` | Dataset row counts and metadata. |
-| Class balance | `paper/tables/class_balance.csv` | Label distribution. |
-| VERITE label distribution | `paper/tables/verite_label_distribution.csv` | VERITE label counts. |
-| MMFakeBench label distribution | `paper/tables/mmfakebench_label_distribution.csv` | MMFakeBench label counts. |
-| MMFakeBench fake class distribution | `paper/tables/mmfakebench_fake_cls_distribution.csv` | Fake subtype counts. |
-| CLIP similarity | `paper/tables/clip_similarity_newsclip_test.csv` | CLIP similarity statistics. |
-| CLIP threshold scan | `paper/tables/clip_threshold_scan_newsclip_test.csv` | Threshold sweep. |
-| NER entity stats | `paper/tables/ner_entity_stats.csv` | Entity extraction summary. |
-| NER entity richness | `paper/tables/ner_entity_richness_ooc_vs_genuine.csv` | Entity richness by class. |
-| Visual grounding stats | `paper/tables/vg_stats.csv` | Visual grounding summary. |
-| Entity scorer feature stats | `paper/tables/entity_scorer_feature_stats.csv` | Stream A feature statistics. |
-| Entity scorer discrimination | `paper/tables/entity_scorer_discrimination.csv` | Stream A discrimination metrics. |
-| Stream A results | `paper/tables/stream_a_results.csv` | Stream A evaluation. |
-| Stream A vs baseline | `paper/tables/stream_a_vs_baseline.csv` | Stream A compared to baseline. |
-| Stream A VERITE predictions | `paper/tables/stream_a_verite_predictions.csv` | VERITE row-level predictions. |
-| Stream B accuracy | `paper/tables/stream_b_accuracy.csv` | Stream B accuracy summary. |
-| Stream B feature selection | `paper/tables/stream_b_feature_selection.csv` | Selected Stream B features. |
-| Stream B results | `paper/tables/stream_b_results.csv` | Stream B evaluation. |
-| VERITE embedding stats | `paper/tables/verite_embedding_stats.csv` | VERITE embedding statistics. |
+| Dataset summary | `paper/tables/manifest_summary.csv` or `data/processed/ooc_pairs/reports/manifest_summary.csv` | Dataset row/image summary |
+| EDA dataset summary | `paper/tables/eda_dataset_summary.csv` | Processed manifest stats |
+| Class balance | `paper/tables/class_balance.csv` | Label counts |
+| NER summary | `paper/tables/ner_manifest_summary.csv` | NER stats |
+| Visual grounding summary | `paper/tables/visual_grounding_summary.csv` | Stream A grounding stats |
+| Entity scorer features | `paper/tables/entity_scorer_feature_summary.csv` | Stream A feature stats |
+| Stream A results | `paper/tables/stream_a_results.csv` | Stream A metrics |
+| Stream B feature summary | `paper/tables/stream_b_clip_feature_summary.csv` | Stream B feature stats |
+| Stream B results | `paper/tables/stream_b_results.csv` | Stream B metrics |
+| Stream C evidence summary | `paper/tables/stream_c_evidence_summary.csv` | Evidence text stats |
+| Stream C stance summary | `paper/tables/stream_c_stance_summary.csv` | Stance similarity stats |
+| Stream C results | `paper/tables/stream_c_results.csv` | Stream C metrics |
+| Baseline results | `paper/tables/baseline_results.csv` | Majority/constant baselines |
+| CLIP baseline | `paper/tables/clip_baseline_results.csv` | CLIP cosine rank baseline |
+| All streams summary | `paper/tables/all_streams_and_baselines_summary.csv` | Combined summary |
 
 ---
 
 # 9. Output summary so far
 
-The strongest confirmed result so far is the dataset cleanup and normalization.
+## Dataset outputs
 
-## Confirmed processed dataset results
-
-| Output | Value |
+| Check | Result |
 |---|---:|
 | Total manifest rows | 97,361 |
-| Rows with local images | 11,621 |
+| Local-image rows | 11,621 |
 | Flat image files | 11,495 |
-| Unique image IDs in `all.csv` | 83,461 |
+| Unique image IDs | 83,461 |
 | Broken image paths | 0 |
 | Empty captions | 0 |
 
-## Confirmed per-dataset results
+## Stream A result summary
 
-| Dataset | Rows | Local image rows | Notes |
+Stream A completed successfully but is weak.
+
+| Evaluation set | Accuracy | AUROC | Interpretation |
 |---|---:|---:|---|
-| NewsCLIPpings train | 71,072 | 0 | Embedding-only |
-| NewsCLIPpings val | 7,024 | 0 | Embedding-only |
-| NewsCLIPpings test | 7,264 | 0 | Embedding-only |
-| VERITE test | 1,001 | 621 | Partial local coverage |
-| MMFakeBench val | 1,000 | 1,000 | Full local images |
-| MMFakeBench test | 10,000 | 10,000 | Full local images |
+| MMFakeBench test | 62.56% | Not strongest | Below majority baseline |
+| VERITE local | 53.30% | Weak | Entity grounding alone is insufficient |
 
-## Confirmed data quality results
+Stream A should be used as a weak feature stream for fusion, not as a standalone final model.
 
-| Check | Result |
-|---|---|
-| Manifest captions | No empty captions |
-| Image paths | 0 broken image paths |
-| Processed images | Flat folder created |
-| VERITE duplicate raw paths | Resolved through manifest |
-| MMFakeBench nested folders | Flattened into unique processed filenames |
-| NewsCLIPpings missing local images | Explicitly represented as embedding-only |
+## Stream B result summary
 
-## Model/output status
+After fixing NewsCLIPpings embeddings, Stream B is the strongest current stream.
 
-Earlier paper figures and tables exist for EDA, Stream A, Stream B, and some Stream C reporting. However, after the dataset restructure, these outputs should be considered **pre-cleanup outputs** until the relevant notebooks are rerun on the new manifest layer.
+| Evaluation set | Accuracy | AUROC | Interpretation |
+|---|---:|---:|---|
+| NewsCLIP test | 65.87% | 73.91% | Good signal |
+| MMFakeBench test | 46.95% | 63.35% | Some OOD signal, threshold weak |
+| VERITE local | 63.77% | 49.12% | Accuracy okay, calibration/AUROC weak |
 
-Recommended interpretation:
+Important fix that made Stream B valid:
 
 ```text
-Existing figures/tables = useful previous outputs
-New processed manifests = canonical dataset source going forward
-Next step = rerun Stream A/B/C notebooks from manifest layer
+Used real NewsCLIP embeddings: 85,360
+Missing NewsCLIP image embeddings: 0
+Missing NewsCLIP text embeddings: 0
+Fallback: 380
 ```
+
+## Stream C result summary
+
+Stream C ran correctly but is weak because it is currently metadata/caption-derived, not real retrieval.
+
+| Evaluation set | Accuracy | AUROC | Interpretation |
+|---|---:|---:|---|
+| NewsCLIP test | 52.04% | 52.17% | Near random |
+| MMFakeBench test | 30.62% | 61.85% | Score has some signal but threshold bad |
+| VERITE test | 33.77% | 43.58% | Weak |
+
+Stream C should currently be reported as:
+
+```text
+Offline metadata evidence baseline
+```
+
+not final RAG.
+
+## Baseline summary
+
+| Baseline | Notes |
+|---|---|
+| Majority baseline | Important for MMFakeBench and VERITE because labels are imbalanced |
+| CLIP cosine rank | Strong baseline; close to Stream B on NewsCLIP |
+| Stream B | Best current model stream |
+| Stream C | Needs real evidence retrieval |
+| Stream A | Useful for fusion but weak alone |
 
 ---
 
 # 10. Issues faced and how we solved them
 
-## Issue 1: VERITE images existed in duplicated locations
+## Issue 1: Raw dataset layout was messy
 
 Problem:
+
+The project had old folders, duplicated image folders, and inconsistent dataset paths.
+
+Solution:
+
+- Created canonical raw structure under `data/raw/`.
+- Created canonical processed structure under `data/processed/ooc_pairs/`.
+- Updated `src/utils/paths.py`.
+
+## Issue 2: VERITE had duplicate image folders
+
+Problem:
+
+Two folders contained overlapping VERITE images:
 
 ```text
 data/verite/image-text-verification/VERITE/images/
 data/verite/images/
 ```
 
-These folders had overlapping images. One was incomplete.
-
 Solution:
 
-- Moved raw data under `data/raw/`.
-- Chose canonical raw VERITE path:
+- Canonical raw path:
+  ```text
+  data/raw/verite/image-text-verification/VERITE/images/
+  ```
+- Processed images copied into:
+  ```text
+  data/processed/ooc_pairs/images/
+  ```
 
-```text
-data/raw/verite/image-text-verification/VERITE/images/
-```
-
-- Built processed image layer from canonical raw path.
-- Stopped using the old duplicate path.
-
-## Issue 2: VERITE image coverage was misunderstood
-
-At one point, the project expected around 663 images. After validation, the actual final processed result is:
-
-```text
-621 VERITE rows with local images
-495 unique VERITE processed image files
-```
-
-This is not a contradiction because VERITE reuses images across multiple rows. Example pattern:
-
-```text
-row 0 → true_0.jpg
-row 1 → true_0.jpg
-row 2 → false_0.jpg
-```
-
-Solution:
-
-- Use `has_image` at the row level.
-- Use `image_id` at the unique image level.
-- Report both row coverage and unique image count.
-
-## Issue 3: NewsCLIPpings local images are unavailable
+## Issue 3: Should `true_*.jpg` and `false_*.jpg` be deleted?
 
 Problem:
 
-NewsCLIPpings rows reference VisualNews image paths, but local VisualNews images are not available in this project.
-
-Solution:
-
-- Set `has_image = 0`.
-- Leave `image_path` blank.
-- Preserve:
-  - `raw_image_path`
-  - `source_image_id`
-  - `clip_image_key`
-  - `clip_text_key`
-- Use pre-extracted embeddings for Stream B and other NewsCLIPpings processing.
-
-## Issue 4: MMFakeBench had deeply nested folders
-
-Problem:
-
-MMFakeBench raw image paths looked like:
+VERITE CSV directly references:
 
 ```text
-/real/bbc_test_500/bbc_test_0.png
-/fake/antifact_image_generation_test_500/...
-```
-
-This produced many subfolders.
-
-Solution:
-
-- Copy MMFakeBench images into one flat processed image folder.
-- Prefix filenames with dataset/split/path information, e.g.:
-
-```text
-mmfakebench_test_real_bbc_test_500_bbc_test_0.png
-```
-
-This prevents collisions and makes processing simple.
-
-## Issue 5: Pandas JSON loading failed for NewsCLIPpings
-
-Problem:
-
-`pd.read_json()` failed with:
-
-```text
-ValueError: Mixing dicts with non-Series may lead to ambiguous ordering.
-```
-
-Reason:
-
-NewsCLIPpings JSON is a dictionary with wrappers like:
-
-```text
-source_datasets
-annotations
+images/true_0.jpg
+images/false_0.jpg
 ```
 
 Solution:
 
-- Use Python `json.load()`.
-- Extract `annotations`.
-- Convert the list/dict into records manually.
+Do **not** delete them from raw data. They are required by the original dataset.
 
-## Issue 6: PowerShell rejected Bash heredoc commands
+Processed image names can be normalized, but raw files must be preserved.
+
+## Issue 4: VERITE row count vs image file count mismatch
 
 Problem:
 
-Commands like:
+VERITE had:
+
+```text
+621 local-image rows
+495 unique local image files
+```
+
+This looked inconsistent.
+
+Solution:
+
+Recognized that VERITE reuses the same image across multiple rows.
+
+Example:
+
+```text
+row 0 -> true_0.jpg
+row 1 -> true_0.jpg
+row 2 -> false_0.jpg
+```
+
+So row coverage and unique image count are different.
+
+## Issue 5: NewsCLIPpings local images were unavailable
+
+Problem:
+
+NewsCLIPpings has VisualNews image paths, but local image files are not present.
+
+Solution:
+
+- Use `has_image = 0`.
+- Preserve `raw_image_path`, `clip_image_key`, `clip_text_key`.
+- Use real pre-extracted NewsCLIPpings embeddings from:
+  ```text
+  data/raw/newsclippings/embeddings/
+  ```
+
+## Issue 6: Stream B initially used fake image vectors
+
+Problem:
+
+The first updated Stream B notebook used deterministic hash vectors for NewsCLIPpings image embeddings. This produced weak results.
+
+Bad logic:
+
+```python
+ivec = stable_hash_vec(clip_image_key)
+```
+
+Solution:
+
+Loaded real NewsCLIPpings PKL embeddings:
+
+```text
+clip_image_embeddings_train.pkl
+clip_image_embeddings_val.pkl
+clip_image_embeddings_test.pkl
+clip_text_embeddings_train.pkl
+clip_text_embeddings_val.pkl
+clip_text_embeddings_test.pkl
+```
+
+Result:
+
+```text
+Used real NewsCLIP embeddings: 85,360
+Missing image/text embeddings: 0
+```
+
+Stream B improved significantly.
+
+## Issue 7: PowerShell heredoc syntax failed
+
+Problem:
+
+PowerShell does not support Bash syntax:
 
 ```bash
 python - <<'PY'
 ```
 
-failed in PowerShell.
-
 Solution:
 
-Use PowerShell-safe file writing:
+Use PowerShell-safe script creation:
 
 ```powershell
 @'
@@ -1254,17 +1102,15 @@ python code here
 python script.py
 ```
 
-## Issue 7: Python backslash escaping caused syntax errors
+## Issue 8: Python backslash escaping caused syntax errors
 
 Problem:
 
-Notebook cells accidentally contained:
+Notebook cells contained:
 
 ```python
 replace('\', '/')
 ```
-
-This is invalid Python because the backslash escapes the quote.
 
 Solution:
 
@@ -1274,423 +1120,421 @@ Use:
 replace("\\", "/")
 ```
 
-This was fixed in the dataset builder code.
-
-## Issue 8: Old processed image folders still existed
+## Issue 9: EDA notebook had duplicate `savefig()` definition
 
 Problem:
 
-The earlier processed structure had nested folders such as:
+A later cell overwrote a flexible `savefig()` helper with a stricter one, causing calls like:
 
-```text
-data/processed/ooc_pairs/images/mmfakebench/test/fake/...
-data/processed/ooc_pairs/images/verite/...
+```python
+savefig("figure_name")
 ```
 
-But the new target is a flat image folder.
+to fail.
 
 Solution:
 
-The cleanup cell in the flat dataset notebook removes old processed image folders and rebuilds:
+Restored flexible helper:
 
-```text
-data/processed/ooc_pairs/images/
+```python
+def savefig(fig_or_name, name=None, dpi=200):
+    if name is None:
+        fig = plt.gcf()
+        name = fig_or_name
+    else:
+        fig = fig_or_name
 ```
 
-as a single flat folder.
-
-## Issue 9: Old caches were stale
+## Issue 10: Stream C evidence was circular
 
 Problem:
 
-Caches from previous VERITE image coverage and old paths were stale.
-
-Examples:
+Stream C evidence text included the caption itself, making the stance similarity circular:
 
 ```text
-cache/visual_grounding/vg_verite.pkl
-cache/entity_scorer/features_verite.pkl
-cache/lora_stage2/ood_embs_verite.pkl
+caption -> evidence containing caption
 ```
 
 Solution:
 
-- Move caches into stream-specific folders.
-- Delete stale VERITE-derived caches before rerunning notebooks.
-- Rebuild caches from the processed manifest layer.
+Current status:
 
-## Issue 10: Paper figures/tables may be outdated
+- Marked current Stream C as offline metadata evidence baseline.
+- Next fix: remove caption from evidence text and use independent article/retrieval evidence.
+
+## Issue 11: Old caches could contaminate results
 
 Problem:
 
-Figures/tables were generated before the final dataset cleanup.
+Old caches were built with outdated paths or fake embeddings.
 
 Solution:
 
-- Keep them as previous outputs.
-- Rerun paper notebooks after Stream A/B/C are rerun from the new manifests.
-- Use `paper/figures/` and `paper/tables/` as final output locations.
+When changing major logic, delete relevant cache folders.
 
----
+For Stream B after fake embedding issue:
 
-# 11. How to use the project now
-
-## Load paths
-
-Use:
-
-```python
-from src.utils.paths import (
-    MANIFESTS,
-    PROCESSED_IMAGES,
-    TRAIN_MANIFEST,
-    VAL_MANIFEST,
-    TEST_MANIFEST,
-    VERITE_TEST_MANIFEST,
-    MMFAKEBENCH_VAL_MANIFEST,
-    MMFAKEBENCH_TEST_MANIFEST,
-    ALL_MANIFEST,
-)
-```
-
-## Load manifests
-
-```python
-import pandas as pd
-
-train_df = pd.read_csv(TRAIN_MANIFEST, low_memory=False)
-val_df = pd.read_csv(VAL_MANIFEST, low_memory=False)
-test_df = pd.read_csv(TEST_MANIFEST, low_memory=False)
-verite_df = pd.read_csv(VERITE_TEST_MANIFEST, low_memory=False)
-mmfake_val_df = pd.read_csv(MMFAKEBENCH_VAL_MANIFEST, low_memory=False)
-mmfake_test_df = pd.read_csv(MMFAKEBENCH_TEST_MANIFEST, low_memory=False)
-all_df = pd.read_csv(ALL_MANIFEST, low_memory=False)
-```
-
-## Get rows with local images
-
-```python
-df_img = all_df[all_df["has_image"] == 1].copy()
-```
-
-## Convert image paths to absolute paths
-
-```python
-from pathlib import Path
-from src.utils.paths import ROOT
-
-df_img["abs_image_path"] = df_img["image_path"].map(lambda p: ROOT / p)
-```
-
-## Use NewsCLIPpings embeddings
-
-For NewsCLIPpings:
-
-```python
-news_df = all_df[all_df["dataset"] == "newsclippings"].copy()
-```
-
-Use:
-
-```python
-clip_image_key
-clip_text_key
-```
-
-rather than `image_path`.
-
-## Use VERITE and MMFakeBench images
-
-For local-image datasets:
-
-```python
-local_img_df = all_df[
-    (all_df["has_image"] == 1)
-    & (all_df["dataset"].isin(["verite", "mmfakebench"]))
-].copy()
+```powershell
+Remove-Item cache/stream_b/clip_embeddings -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item cache/stream_b/features -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item cache/stream_b/lora_stage1 -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item cache/stream_b/lora_stage2 -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item cache/stream_b/final -Recurse -Force -ErrorAction SilentlyContinue
 ```
 
 ---
 
-# 12. Important implementation notes
+# 11. Important implementation notes
 
-## Do not scan raw folders in modeling notebooks
+## Use GPU when useful
 
-Model notebooks should not manually search:
+The project should use GPU for:
 
-```text
-data/raw/
-```
+- CLIP image encoding,
+- CLIP text encoding,
+- SentenceTransformer stance encoding,
+- neural models,
+- LoRA/MLP-style training,
+- MLLM inference/fine-tuning.
 
-Instead, they should use:
-
-```text
-data/processed/ooc_pairs/manifests/
-```
-
-This makes experiments reproducible.
-
-## Do not manually assume image filenames
-
-Do not assume image names like:
+The machine target is:
 
 ```text
-0000.jpg
-true_0.jpg
-bbc_test_0.png
+RTX 4060 Ti, 8 GB VRAM
+Python 3.13 GPU kernel
 ```
 
-Always read:
+Recommended defaults:
 
 ```python
-row["image_path"]
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+USE_AMP = DEVICE == "cuda"
+torch.backends.cudnn.benchmark = True
+torch.set_float32_matmul_precision("high")
 ```
 
-from the manifest.
+Conservative batch sizes:
 
-## Use `pair_id` for row-level caches
+```python
+IMAGE_BATCH_SIZE = 48
+TEXT_BATCH_SIZE = 256
+TRAIN_BATCH_SIZE = 512
+```
 
-Each image-caption pair has a unique `pair_id`.
+If CUDA OOM occurs:
 
-Use it when saving:
+```python
+IMAGE_BATCH_SIZE = 32
+TEXT_BATCH_SIZE = 128
+TRAIN_BATCH_SIZE = 256
+```
+
+## Use manifests, not raw paths
+
+Notebooks should load:
+
+```python
+from src.utils.paths import ALL_MANIFEST
+df = pd.read_csv(ALL_MANIFEST, low_memory=False)
+```
+
+They should not manually scan `data/raw/`.
+
+## Use `pair_id` and `image_id` correctly
+
+Use `pair_id` for row-level outputs:
 
 - predictions,
-- feature rows,
-- NER results,
-- evidence results,
-- stance scores.
+- evidence,
+- stance scores,
+- labels,
+- Stream A/B/C predictions.
 
-## Use `image_id` for image-level caches
-
-The same image may be used by multiple rows.
-
-Use `image_id` when saving:
+Use `image_id` for image-level outputs:
 
 - image embeddings,
 - visual grounding image features,
-- image-only features.
+- cached processed image vectors.
 
 ## Keep raw data unchanged
 
-Raw data should preserve original dataset format.
+Do not delete raw dataset files. Raw data should preserve original downloaded datasets.
 
-Do not delete:
+## Keep processed data reproducible
 
-```text
-data/raw/verite/image-text-verification/VERITE/images/true_*.jpg
-data/raw/verite/image-text-verification/VERITE/images/false_*.jpg
-```
-
-because VERITE CSV references those names.
-
-## Keep generated outputs separate
-
-Recommended output policy:
-
-```text
-cache/       = intermediate features/predictions
-paper/       = final tables and figures
-experiments/ = run-specific logs/checkpoints
-```
+Processed data can be deleted and rebuilt from setup notebooks.
 
 ## GitHub note
 
-Large raw data and cache files usually should not be committed. The repository can commit:
+The repo can contain:
 
-- source code,
-- notebooks,
+- code,
 - configs,
+- notebooks,
 - README,
 - GRAND_PLAN,
 - small result tables,
 - final figures.
 
-Large data/caches should be stored externally or ignored depending on GitHub size limits.
+Large datasets and caches may exceed GitHub limits and should be ignored or handled externally.
 
 ---
 
-# 13. Glossary
+# 12. How to run the project
+
+## Full setup run
+
+```text
+1. notebooks/01_setup/env_check.ipynb
+2. notebooks/01_setup/data_setup.ipynb
+3. notebooks/01_setup/env_check.ipynb
+4. notebooks/01_setup/eda.ipynb
+```
+
+## Stream A run
+
+```text
+1. notebooks/02_stream_a/ner_pipeline_v2_updated.ipynb
+2. notebooks/02_stream_a/visual_grounding_v2_updated.ipynb
+3. notebooks/02_stream_a/entity_scorer_v2_updated.ipynb
+4. notebooks/02_stream_a/stream_a_results_v2_updated.ipynb
+```
+
+## Stream B run
+
+```text
+1. notebooks/03_stream_b/clip_features_updated.ipynb
+2. notebooks/03_stream_b/lora_stage1_updated.ipynb
+3. notebooks/03_stream_b/lora_stage2_fixed_updated.ipynb
+4. notebooks/03_stream_b/stream_b_results_fixed_updated.ipynb
+```
+
+## Stream C run
+
+```text
+1. notebooks/04_stream_c/evidence_retrieval_patch_fixed_updated.ipynb
+2. notebooks/04_stream_c/evidence_val_fix_updated.ipynb
+3. notebooks/04_stream_c/stance_scoring_fixed_updated.ipynb
+4. notebooks/04_stream_c/stream_c_results_fixed_updated.ipynb
+5. notebooks/05_fusion/baselines_fixed_updated.ipynb
+```
+
+## Next: fusion run
+
+Planned:
+
+```text
+1. notebooks/05_fusion/fusion_module.ipynb
+2. notebooks/05_fusion/fusion_training.ipynb
+3. notebooks/07_eval/newsclippings_eval.ipynb
+4. notebooks/07_eval/cross_dataset_eval.ipynb
+5. notebooks/07_eval/ablations.ipynb
+6. notebooks/08_paper/tables.ipynb
+7. notebooks/08_paper/figures.ipynb
+```
+
+---
+
+# 13. Current limitations and next research fixes
+
+## Limitation 1: Stream C is not true RAG yet
+
+Current Stream C uses metadata-derived evidence. It does not retrieve independent external evidence.
+
+### Fix
+
+Build independent evidence:
+
+| Dataset | Better evidence source |
+|---|---|
+| NewsCLIPpings | Article text from metadata/full article files if available |
+| VERITE | `VERITE_articles.csv` |
+| MMFakeBench | Retrieved web/article evidence or source-specific metadata |
+| All | Entity-based web/news retrieval |
+
+Do not include the caption itself in `evidence_text`.
+
+## Limitation 2: MMFakeBench OOD transfer is still weak
+
+Stream B has some AUROC signal on MMFakeBench but accuracy is low due to threshold/domain shift.
+
+### Fix
+
+- Tune thresholds per validation split.
+- Train a calibration model on MMFakeBench validation.
+- Add fusion features.
+- Use image manipulation/fake-class features.
+- Evaluate per `fake_cls`.
+
+## Limitation 3: VERITE AUROC is weak
+
+Stream B VERITE accuracy is okay but AUROC is near random, implying poor ranking/calibration.
+
+### Fix
+
+- Tune threshold on validation-like OOD data.
+- Use VERITE articles.
+- Use entity mismatch and evidence contradiction features.
+- Evaluate only rows with `has_image = 1` separately from all rows.
+
+## Limitation 4: Stream A is weak alone
+
+Entity grounding alone is not enough.
+
+### Fix
+
+Use Stream A in fusion rather than as a standalone model.
+
+## Limitation 5: MLLM explanation is not implemented yet
+
+### Fix
+
+After fusion, add:
+
+- example selection,
+- Qwen/MLLM inference,
+- structured explanation format,
+- explanation quality evaluation.
+
+---
+
+# 14. Glossary
+
+## Out-of-context image detection
+
+Detecting whether an image is paired with a misleading or wrong caption/context.
 
 ## OOC
 
-**Out-of-context.**  
-An image is paired with a misleading or mismatched caption/context.
+Out-of-context. Usually label `1`.
 
 ## Match
 
-A correct image-text pair. Label `0`.
+Correct image-text pair. Label `0`.
 
 ## Mismatch
 
-An incorrect or out-of-context image-text pair. Label `1`.
+Incorrect/misleading image-text pair. Label `1`.
 
 ## Manifest
 
-A CSV file that describes dataset rows. It contains paths, captions, labels, IDs, and metadata.
+A CSV file that stores normalized dataset rows.
 
 ## Raw data
 
-Original downloaded dataset files. Stored under:
-
-```text
-data/raw/
-```
+Original downloaded dataset files under `data/raw/`.
 
 ## Processed data
 
-Clean normalized project data. Stored under:
-
-```text
-data/processed/ooc_pairs/
-```
+Clean normalized dataset under `data/processed/ooc_pairs/`.
 
 ## Flat image folder
 
-A single folder containing all processed local images:
+A single folder containing all processed local images.
 
 ```text
 data/processed/ooc_pairs/images/
 ```
 
-No nested dataset folders are needed because filenames are made unique.
-
 ## `pair_id`
 
-Unique row ID for an image-text pair.
-
-Example:
-
-```text
-nc_620701_0
-verite_0000
-mmfakebench_test_00000
-```
+Unique ID for an image-text pair row.
 
 ## `image_id`
 
-Unique processed image ID.
-
-Example:
-
-```text
-verite_true_0
-mmfakebench_test_real_bbc_test_500_bbc_test_0
-```
+Unique ID for an image file/embedding.
 
 ## `has_image`
 
-Whether a row has a local processed image file.
-
-```text
-1 = image exists locally
-0 = no local image
-```
-
-## `image_path`
-
-Path to the processed image if available.
-
-Example:
-
-```text
-data/processed/ooc_pairs/images/verite_true_0.jpg
-```
-
-## `raw_image_path`
-
-Original path/reference from the raw dataset.
-
-Example:
-
-```text
-images/true_0.jpg
-/real/bbc_test_500/bbc_test_0.png
-visual_news/origin/guardian/images/0540/632.jpg
-```
+Whether a local processed image file exists.
 
 ## `clip_image_key`
 
-Key used to find pre-extracted image embeddings.
-
-Especially important for NewsCLIPpings.
+Key used to retrieve pre-extracted CLIP image embeddings.
 
 ## `clip_text_key`
 
-Key used to find pre-extracted text embeddings.
-
-Especially important for NewsCLIPpings.
+Key used to retrieve pre-extracted CLIP text embeddings.
 
 ## NER
 
-Named Entity Recognition.  
-Extracts entities such as people, organizations, locations, and dates.
+Named Entity Recognition.
 
 ## Visual grounding
 
-Checking whether text entities or concepts are visually supported by the image.
+Checking whether text entities/concepts are supported visually by the image.
 
 ## CLIP
 
-A model that embeds images and text into a shared representation space.
+A model that embeds images and text into the same vector space.
 
 ## LoRA
 
-Low-Rank Adaptation.  
-A parameter-efficient fine-tuning method.
+Low-Rank Adaptation. In this project, Stream B notebooks use LoRA-style naming, though current updated versions include lightweight trained feature models rather than full deep LoRA fine-tuning.
 
 ## RAG
 
-Retrieval-Augmented Generation or Retrieval-Augmented Reasoning.  
-Uses retrieved evidence to improve prediction or explanation.
+Retrieval-Augmented Generation or Retrieval-Augmented Reasoning.
 
 ## Stance scoring
 
-Determining whether evidence supports, contradicts, or is neutral toward a claim/caption.
+Determining whether evidence supports, contradicts, or is neutral toward a claim.
 
 ## Stream A
 
-Entity verification stream.
+Entity verification and visual grounding stream.
 
 ## Stream B
 
-CLIP / LoRA multimodal representation stream.
+CLIP/representation learning stream.
 
 ## Stream C
 
-Evidence retrieval and stance reasoning stream.
+Evidence and stance reasoning stream.
 
 ## Fusion
 
-Combining outputs/features from multiple streams into one final prediction.
+Combining Stream A/B/C predictions/features.
 
 ## MLLM
 
-Multimodal Large Language Model.  
-A model that can reason over text and images.
+Multimodal Large Language Model.
+
+## OOD
+
+Out-of-domain. For this project, VERITE and MMFakeBench are OOD relative to NewsCLIPpings training.
+
+## AUROC
+
+Area under ROC curve. Measures ranking quality independent of a fixed threshold.
+
+## Calibration
+
+Adjusting model scores/thresholds so probabilities and decisions transfer better across datasets.
 
 ---
 
-# 14. Beginner mental model
+# 15. Beginner mental model
 
-A beginner should understand the project like this:
+A beginner can understand the project in this order.
 
-## Step 1: Data is normalized
+## Step 1: Everything starts from manifests
 
-All datasets are converted into rows like:
-
-```text
-pair_id, image_path, caption, label
-```
-
-The main files are:
+The main data files are:
 
 ```text
 data/processed/ooc_pairs/manifests/*.csv
 ```
 
-## Step 2: Images are centralized
+Each row is:
 
-All available local images are copied into:
+```text
+image-text pair + label + paths + IDs + metadata
+```
+
+## Step 2: Images live in one folder
+
+All available local images are copied to:
 
 ```text
 data/processed/ooc_pairs/images/
@@ -1698,92 +1542,59 @@ data/processed/ooc_pairs/images/
 
 The manifest tells you which image belongs to which row.
 
-## Step 3: Some rows do not have local images
+## Step 3: NewsCLIPpings uses embeddings
 
-NewsCLIPpings rows have no local images. That is expected.
+NewsCLIPpings has no local images, but it has real pre-extracted embeddings.
 
-They use embedding keys instead.
-
-## Step 4: Models are organized into streams
-
-- Stream A checks entities.
-- Stream B checks multimodal embeddings.
-- Stream C checks evidence.
-- Fusion combines them.
-
-## Step 5: Outputs go to paper folders
-
-Figures:
+Use:
 
 ```text
-paper/figures/
+clip_image_key
+clip_text_key
 ```
 
-Tables:
+## Step 4: Stream A extracts entities
+
+It asks:
 
 ```text
-paper/tables/
+Do the named people/places/organizations in the caption appear visually/evidentially supported?
 ```
 
-## Step 6: Never trust old raw paths
+## Step 5: Stream B learns image-text representation mismatch
 
-Always use the processed manifest.
-
----
-
-# 15. Next steps
-
-## Immediate next steps
-
-1. Commit the clean directory structure.
-2. Keep `00_make_flat_processed_dataset.ipynb` as the official dataset builder.
-3. Update `src/utils/paths.py`.
-4. Rerun `env_check.ipynb`.
-5. Rerun `eda.ipynb` using processed manifests.
-6. Update Stream A notebooks to read manifests.
-7. Delete or invalidate stale Stream A caches.
-8. Rerun Stream A.
-9. Update Stream B notebooks to read manifests.
-10. Rerun Stream B.
-11. Update Stream C notebooks to read manifests.
-12. Rerun Stream C.
-13. Regenerate paper tables and figures.
-
-## Recommended notebook rerun order
+It asks:
 
 ```text
-1. notebooks/00_make_flat_processed_dataset.ipynb
-2. notebooks/01_setup/env_check.ipynb
-3. notebooks/01_setup/eda.ipynb
-4. notebooks/02_stream_a/ner_pipeline_v2.ipynb
-5. notebooks/02_stream_a/visual_grounding_v2.ipynb
-6. notebooks/02_stream_a/stream_a_results_v2_fixed.ipynb
-7. notebooks/03_stream_b/clip_features.ipynb
-8. notebooks/03_stream_b/lora_stage1.ipynb
-9. notebooks/03_stream_b/lora_stage2_fixed.ipynb
-10. notebooks/03_stream_b/stream_b_results_fixed.ipynb
-11. notebooks/04_stream_c/evidence_retrieval_patch_fixed.ipynb
-12. notebooks/04_stream_c/stance_scoring_fixed.ipynb
-13. notebooks/04_stream_c/stream_c_results_fixed.ipynb
-14. notebooks/05_fusion/baselines_fixed.ipynb
-15. notebooks/05_fusion/fusion_module.ipynb
-16. notebooks/05_fusion/fusion_training.ipynb
-17. notebooks/07_eval/newsclippings_eval.ipynb
-18. notebooks/07_eval/cross_dataset_eval.ipynb
-19. notebooks/07_eval/ablations.ipynb
-20. notebooks/08_paper/tables.ipynb
-21. notebooks/08_paper/figures.ipynb
+Do the image and text embeddings look compatible?
 ```
 
-## Final principle
+This is currently the best stream.
 
-The project should now be treated as:
+## Step 6: Stream C tries to use evidence
+
+Current Stream C is only an offline metadata baseline.
+
+Future Stream C should ask:
 
 ```text
-Raw datasets are only sources.
-Processed manifests are the truth.
-Notebooks should never hardcode raw paths again.
+Does independent article/web evidence support or contradict the caption-image pair?
 ```
+
+## Step 7: Fusion combines streams
+
+The final model should combine:
+
+```text
+Stream A entity features
++ Stream B CLIP/features
++ Stream C evidence features
+= final prediction
+```
+
+## Step 8: MLLM explains
+
+The final explanation model should describe *why* the pair is true or out-of-context.
 
 ---
 
