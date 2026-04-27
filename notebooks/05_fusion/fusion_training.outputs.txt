@@ -1,0 +1,303 @@
+# Notebook: e:\eve-rag\notebooks\05_fusion\fusion_training.ipynb
+# Dumped at: 2026-04-28T02:19:29
+====================================================================================================
+
+--- Cell 1  [exec_count=1]  (# === ENVIRONMENT ===) ---
+[stdout]
+Python      : 3.13.13
+PyTorch     : 2.6.0+cu124
+CUDA avail  : True
+GPU         : NVIDIA GeForce RTX 4060 Ti
+VRAM        : 8.6 GB
+Device      : cuda
+
+ROOT          : E:\eve-rag
+FUSION_CACHE  : E:\eve-rag\cache\fusion
+
+--- Cell 2  [exec_count=2]  (# === HYPERPARAMETERS ===) ---
+
+--- Cell 3  [exec_count=3]  (# === LOAD FUSION FEATURES + SCHEMA ===) ---
+[stdout]
+Stream feature dims  : A=12  B=11  C=7  (total=30)
+Fusion table shape   : (97361, 35)
+Datasets             : {'newsclippings': 85360, 'mmfakebench': 11000, 'verite': 1001}
+Splits               : {'train': 71072, 'test': 18265, 'val': 8024}
+Label balance (all)  : {1: 51043, 0: 46318}
+
+--- Cell 4  [exec_count=4]  (# === DEFINE TRAIN / VAL / EVAL SPLITS ===) ---
+[stdout]
+MMFakeBench val split: 500 → train, 500 → tune
+
+Training    : 71,572 rows  (pos rate = 0.501)
+  ├─ NC train     : 71,072
+  └─ MMFB val(½)  : 500
+Validation  : 7,024 rows  (pos rate = 0.500)  (NC val — early stopping)
+  newsclippings_val        :  7,024 rows  (pos rate = 0.500)
+  newsclippings_test       :  7,264 rows  (pos rate = 0.500)
+  mmfakebench_val_tune     :    500 rows  (pos rate = 0.700)
+  mmfakebench_test         : 10,000 rows  (pos rate = 0.700)
+  verite_test              :  1,001 rows  (pos rate = 0.662)
+
+--- Cell 5  [exec_count=5]  (# === STANDARDIZE (fit on train) + ZERO-IMPUTE MISSING ===) ---
+[stdout]
+train X shape: (71572, 30)  (after standardize+impute)
+val   X shape: (7024, 30)
+Wrote E:\eve-rag\cache\fusion\feature_scaler.json
+
+--- Cell 6  [exec_count=6]  (# === DATASETS / DATALOADERS ===) ---
+[stdout]
+Train loader: 70 batches of 1024
+Val   loader: 7 batches of 1024
+
+--- Cell 7  [exec_count=7]  (# === TRAINING LOOP ===) ---
+
+--- Cell 8  [exec_count=8]  (# === TRAIN DEFAULT GSAF ===) ---
+[stdout]
+>>> Training default GSAF
+
+  [default   ] epoch   1 train_loss=0.6601  val_acc=65.58  val_f1=63.06  val_auroc=72.59
+  [default   ] epoch   2 train_loss=0.6200  val_acc=66.03  val_f1=63.40  val_auroc=73.41
+  [default   ] epoch   3 train_loss=0.6100  val_acc=66.57  val_f1=65.27  val_auroc=73.91
+  [default   ] epoch   4 train_loss=0.6057  val_acc=66.93  val_f1=64.78  val_auroc=74.27
+  [default   ] epoch   5 train_loss=0.6033  val_acc=66.84  val_f1=63.24  val_auroc=74.44
+  [default   ] epoch   6 train_loss=0.6024  val_acc=67.34  val_f1=64.61  val_auroc=74.53
+  [default   ] epoch   7 train_loss=0.6000  val_acc=67.55  val_f1=65.56  val_auroc=74.64
+  [default   ] epoch   8 train_loss=0.6003  val_acc=67.38  val_f1=65.46  val_auroc=74.65
+  [default   ] epoch   9 train_loss=0.5986  val_acc=67.47  val_f1=64.75  val_auroc=74.67
+  [default   ] epoch  10 train_loss=0.5983  val_acc=67.68  val_f1=65.75  val_auroc=74.70
+  [default   ] epoch  11 train_loss=0.5966  val_acc=67.85  val_f1=66.70  val_auroc=74.87
+  [default   ] epoch  12 train_loss=0.5971  val_acc=67.80  val_f1=66.08  val_auroc=75.02
+  [default   ] epoch  13 train_loss=0.5959  val_acc=68.05  val_f1=65.68  val_auroc=75.17
+  [default   ] epoch  14 train_loss=0.5945  val_acc=68.41  val_f1=66.34  val_auroc=75.42
+  [default   ] epoch  15 train_loss=0.5946  val_acc=68.14  val_f1=65.09  val_auroc=75.39
+  [default   ] epoch  16 train_loss=0.5932  val_acc=68.59  val_f1=66.64  val_auroc=75.71
+  [default   ] epoch  17 train_loss=0.5925  val_acc=68.61  val_f1=66.91  val_auroc=75.65
+  [default   ] epoch  18 train_loss=0.5922  val_acc=68.62  val_f1=66.31  val_auroc=75.55
+  [default   ] epoch  19 train_loss=0.5915  val_acc=68.39  val_f1=66.74  val_auroc=75.69
+  [default   ] epoch  20 train_loss=0.5924  val_acc=68.74  val_f1=67.17  val_auroc=75.82
+  [default   ] epoch  21 train_loss=0.5914  val_acc=68.71  val_f1=66.91  val_auroc=75.82
+  [default   ] epoch  22 train_loss=0.5899  val_acc=68.85  val_f1=66.64  val_auroc=75.81
+  [default   ] epoch  23 train_loss=0.5903  val_acc=68.99  val_f1=67.70  val_auroc=75.82
+  [default   ] epoch  24 train_loss=0.5906  val_acc=68.44  val_f1=65.75  val_auroc=75.84
+  [default   ] epoch  25 train_loss=0.5891  val_acc=68.51  val_f1=65.96  val_auroc=75.75
+  [default   ] epoch  26 train_loss=0.5895  val_acc=68.72  val_f1=66.90  val_auroc=75.82
+  [default   ] epoch  27 train_loss=0.5895  val_acc=68.62  val_f1=65.97  val_auroc=75.87
+  [default   ] epoch  28 train_loss=0.5905  val_acc=69.39  val_f1=67.11  val_auroc=75.96
+  [default   ] epoch  29 train_loss=0.5879  val_acc=68.99  val_f1=67.25  val_auroc=76.01
+  [default   ] epoch  30 train_loss=0.5888  val_acc=68.94  val_f1=67.88  val_auroc=75.97
+  [default   ] epoch  31 train_loss=0.5890  val_acc=68.89  val_f1=66.35  val_auroc=75.98
+  [default   ] epoch  32 train_loss=0.5887  val_acc=68.91  val_f1=66.68  val_auroc=75.99
+  [default   ] epoch  33 train_loss=0.5883  val_acc=68.99  val_f1=66.92  val_auroc=75.99
+  [default   ] epoch  34 train_loss=0.5878  val_acc=68.94  val_f1=67.01  val_auroc=76.01
+  [default   ] epoch  35 train_loss=0.5869  val_acc=69.06  val_f1=67.37  val_auroc=75.94
+  [default   ] epoch  36 train_loss=0.5879  val_acc=68.78  val_f1=68.38  val_auroc=75.98
+  [default   ] epoch  37 train_loss=0.5876  val_acc=68.78  val_f1=66.29  val_auroc=75.96
+  ↳ early stop after 37 epochs (no AUROC improvement for 8).
+  best val AUROC = 76.01  (29.7s)
+
+Saved default model to E:\eve-rag\cache\fusion\fusion_model.pt
+Saved E:\eve-rag\cache\fusion\fusion_train_history.csv
+
+--- Cell 9  [exec_count=9]  (# === PER-DATASET THRESHOLD TUNING ===) ---
+[stdout]
+Tuned thresholds:
+  newsclippings_val       : 0.482
+  mmfakebench_val_tune    : 0.486
+  default                 : 0.500
+
+--- Cell 10  [exec_count=10]  (# === EVALUATE DEFAULT ON ALL SPLITS ===) ---
+[stdout]
+Default GSAF results:
+[result]
+  model ablation               dataset   tuning    thr    acc     f1  \
+0  GSAF     none     newsclippings_val  default  0.500  68.99  67.25   
+1  GSAF     none     newsclippings_val    tuned  0.482  69.15  68.47   
+2  GSAF     none    newsclippings_test  default  0.500  68.68  66.88   
+3  GSAF     none    newsclippings_test    tuned  0.482  69.01  68.34   
+4  GSAF     none  mmfakebench_val_tune  default  0.500  80.80  85.80   
+5  GSAF     none  mmfakebench_val_tune    tuned  0.486  82.00  86.84   
+6  GSAF     none      mmfakebench_test  default  0.500  78.28  84.28   
+7  GSAF     none      mmfakebench_test    tuned  0.486  78.27  84.41   
+8  GSAF     none           verite_test  default  0.500  62.64  76.33   
+9  GSAF     none           verite_test    tuned  0.482  62.54  76.34   
+
+   f1_macro  auroc  
+0     68.90  76.01  
+1     69.13  76.01  
+2     68.59  76.32  
+3     69.00  76.32  
+4     78.08  89.92  
+5     79.18  89.92  
+6     74.57  87.83  
+7     74.28  87.83  
+8     43.85  48.13  
+9     43.21  48.13
+
+--- Cell 11  [exec_count=11]  (# === SAVE PER-PAIR PREDICTIONS ===) ---
+[stdout]
+Wrote E:\eve-rag\cache\fusion\fusion_predictions.csv  (25,789 rows)
+
+--- Cell 12  [exec_count=12]  (# === TRAIN ABLATIONS ===) ---
+[stdout]
+
+>>> Training ablation: no_a
+
+  best val AUROC = 74.29
+
+>>> Training ablation: no_b
+
+  best val AUROC = 51.82
+
+>>> Training ablation: no_c
+
+  best val AUROC = 74.95
+
+>>> Training ablation: mlp_fusion
+
+  best val AUROC = 76.03
+
+Ablation results (tuned thresholds):
+[result]
+                        acc                                          \
+dataset    mmfakebench_test mmfakebench_val_tune newsclippings_test   
+ablation                                                              
+default               78.27                 82.0              69.01   
+mlp_fusion            63.57                 61.2              68.42   
+no_a                  62.30                 62.0              67.30   
+no_b                  70.84                 71.8              49.97   
+no_c                  62.50                 61.6              68.27   
+
+                                                    auroc  \
+dataset    newsclippings_val verite_test mmfakebench_test   
+ablation                                                    
+default                69.15       62.54            87.83   
+mlp_fusion             68.92       65.83            65.96   
+no_a                   67.51       64.34            65.24   
+no_b                   50.58       65.73            65.27   
+no_c                   67.95       65.93            62.87   
+
+                                                                      \
+dataset    mmfakebench_val_tune newsclippings_test newsclippings_val   
+ablation                                                               
+default                   89.92              76.32             76.01   
+mlp_fusion                62.43              76.26             76.03   
+no_a                      61.19              75.23             74.29   
+no_b                      65.54              52.49             51.82   
+no_c                      61.50              75.47             74.95   
+
+                        
+dataset    verite_test  
+ablation                
+default          48.13  
+mlp_fusion       48.54  
+no_a             47.37  
+no_b             48.96  
+no_c             48.13
+
+--- Cell 13  [exec_count=13]  (# === SAVE PAPER TABLES + COMBINED PER-PAIR PREDICTIONS ===) ---
+[stdout]
+Wrote E:\eve-rag\paper\tables\fusion_results.csv
+Wrote E:\eve-rag\paper\tables\ablation_results.csv
+
+Wrote E:\eve-rag\cache\fusion\fusion_predictions.csv
+  128,945 rows across 5 model variants:
+model            eval_split          
+GSAF_default     mmfakebench_test        10000
+                 mmfakebench_val_tune      500
+                 newsclippings_test       7264
+                 newsclippings_val        7024
+                 verite_test              1001
+GSAF_mlp_fusion  mmfakebench_test        10000
+                 mmfakebench_val_tune      500
+                 newsclippings_test       7264
+                 newsclippings_val        7024
+                 verite_test              1001
+GSAF_no_a        mmfakebench_test        10000
+                 mmfakebench_val_tune      500
+                 newsclippings_test       7264
+                 newsclippings_val        7024
+                 verite_test              1001
+GSAF_no_b        mmfakebench_test        10000
+                 mmfakebench_val_tune      500
+                 newsclippings_test       7264
+                 newsclippings_val        7024
+                 verite_test              1001
+GSAF_no_c        mmfakebench_test        10000
+                 mmfakebench_val_tune      500
+                 newsclippings_test       7264
+                 newsclippings_val        7024
+                 verite_test              1001
+
+--- Cell 14  [exec_count=14]  (# === FIGURE: ALL-MODELS BAR CHART ===) ---
+[result]
+<Figure size 1000x500 with 1 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_summary_bar.png
+
+--- Cell 15  [exec_count=15]  (# === FIGURE: GATE DISTRIBUTION (interpretability) ===) ---
+[result]
+<Figure size 2000x360 with 5 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_gate_distribution.png
+
+--- Cell 16  [exec_count=16]  (# === FIGURES: CONFUSION MATRICES + ROC PER DATASET ===) ---
+[result]
+<Figure size 400x360 with 2 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_confusion_newsclippings_test.png
+[result]
+<Figure size 450x400 with 1 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_roc_newsclippings_test.png
+[result]
+<Figure size 400x360 with 2 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_confusion_mmfakebench_test.png
+[result]
+<Figure size 450x400 with 1 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_roc_mmfakebench_test.png
+[result]
+<Figure size 400x360 with 2 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_confusion_verite_test.png
+[result]
+<Figure size 450x400 with 1 Axes>
+[image: png  (omitted)]
+[stdout]
+Saved E:\eve-rag\paper\figures\fusion_roc_verite_test.png
+
+--- Cell 17  [exec_count=17]  (# === FINAL SUMMARY ===) ---
+[stdout]
+======================================================================
+ FUSION TRAINING COMPLETE
+======================================================================
+  Model checkpoint  : E:\eve-rag\cache\fusion\fusion_model.pt
+  Predictions       : E:\eve-rag\cache\fusion\fusion_predictions.csv
+  Thresholds        : E:\eve-rag\cache\fusion\fusion_thresholds.json
+  Train history     : E:\eve-rag\cache\fusion\fusion_train_history.csv
+  Results table     : E:\eve-rag\paper\tables\fusion_results.csv
+  Ablation table    : E:\eve-rag\paper\tables\ablation_results.csv
+  Bar chart         : E:\eve-rag\paper\figures\fusion_summary_bar.png
+  Gate distribution : E:\eve-rag\paper\figures\fusion_gate_distribution.png
+
+Headline numbers (default GSAF, tuned thresholds):
+[result]
+                dataset    acc  f1_macro  auroc
+3      mmfakebench_test  78.27     74.28  87.83
+2  mmfakebench_val_tune  82.00     79.18  89.92
+1    newsclippings_test  69.01     69.00  76.32
+0     newsclippings_val  69.15     69.13  76.01
+4           verite_test  62.54     43.21  48.13
+[stdout]
+
+Next: 07_eval/newsclippings_eval, 07_eval/cross_dataset_eval, 07_eval/ablations.
+
+--- Cell 18  [exec_count=None]  (# === DUMP ALL CELL OUTPUTS TO TXT ===) ---
