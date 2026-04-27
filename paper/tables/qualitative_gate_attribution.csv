@@ -1,0 +1,13 @@
+dataset,_bucket,A,B,C
+mmfakebench,FN,0.3670,0.3819,0.2511
+mmfakebench,FP,0.2082,0.2951,0.4967
+mmfakebench,TN,0.1717,0.3988,0.4296
+mmfakebench,TP,0.4646,0.1777,0.3577
+newsclippings,FN,0.1972,0.5651,0.2377
+newsclippings,FP,0.2013,0.5013,0.2974
+newsclippings,TN,0.1709,0.6112,0.2179
+newsclippings,TP,0.1993,0.4791,0.3217
+verite,FN,0.0608,0.4911,0.4481
+verite,FP,0.0354,0.5061,0.4585
+verite,TN,0.0593,0.4765,0.4642
+verite,TP,0.0352,0.5082,0.4566

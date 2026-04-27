@@ -1,0 +1,3 @@
+model,n,auroc,auprc,accuracy,f1,precision,recall,threshold
+GSAF (full),1001,0.4813,0.6506,0.6264,0.7633,0.6576,0.9095,0.5000
+Stream C (NLI),1001,0.4594,0.6341,0.3616,0.1776,0.6053,0.1041,0.5000
