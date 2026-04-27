@@ -116,7 +116,6 @@ The original project plan became outdated because the dataset layout changed and
 | Stream A | Complete, weak but valid |
 | Stream B | Complete, fixed with real NewsCLIPpings embeddings |
 | Stream C | ✅ Complete (v3) — decircularized evidence, NLI stance scoring (`cross-encoder/nli-deberta-v3-base`), threshold-tuned results |
-| Baselines | Complete |
 | Fusion | Next |
 | MLLM explanation | Later |
 
