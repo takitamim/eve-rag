@@ -250,10 +250,6 @@ eve-rag/
 │   │   └── stream_b_results_fixed_updated.ipynb
 │   │
 │   ├── 04_stream_c/
-│   │   ├── evidence_retrieval_patch_fixed_updated.ipynb  ← superseded
-│   │   ├── evidence_val_fix_updated.ipynb                ← superseded
-│   │   ├── stance_scoring_fixed_updated.ipynb            ← superseded
-│   │   ├── stream_c_results_fixed_updated.ipynb          ← superseded
 │   │   ├── evidence_retrieval_final.ipynb                ✅ v3 active
 │   │   ├── evidence_val_final.ipynb                      ✅ v3 active
 │   │   ├── stance_scoring_final.ipynb                    ✅ v3 active (NLI)
@@ -571,20 +567,16 @@ Status legend:
 
 | Notebook | Status | Notes |
 |---|---|---|
-| `evidence_retrieval_patch_fixed_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
-| `evidence_val_fix_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
-| `stance_scoring_fixed_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
-| `stream_c_results_fixed_updated.ipynb` | ~~superseded~~ | Replaced by v3 |
 | `evidence_retrieval_final.ipynb` | ✅ Complete (v3) | Decircularized; VERITE uses `query` field; NewsCLIP uses article title+metadata |
 | `evidence_val_final.ipynb` | ✅ Complete (v3) | Repair fallback decircularized; labeled-leak assert passes |
 | `stance_scoring_final.ipynb` | ✅ Complete (v3) | NLI: `cross-encoder/nli-deberta-v3-base` + SBERT cosine; full 97,361 rows scored |
 | `stream_c_results_final.ipynb` | ✅ Complete (v3) | Per-dataset threshold tuning; saves `stream_c_thresholds.json` for fusion |
-| `baselines_fixed_updated.ipynb` | ✅ Complete | Baseline and stream summary tables |
 
 ## Fusion / evaluation / MLLM
 
 | Notebook | Status | Notes |
 |---|---|---|
+| `baselines_fixed_updated.ipynb` | 🔴 Pending | Next major step |
 | `fusion_module.ipynb` | 🔴 Pending | Next major step |
 | `fusion_training.ipynb` | 🔴 Pending | Should combine Stream A/B/C outputs |
 | `newsclippings_eval.ipynb` | 🔴 Pending | Formal eval notebook |
@@ -756,17 +748,13 @@ Outputs:
 cache/stream_c/evidence/raw_evidence_all.csv
 ```
 
-## `evidence_val_fix_updated.ipynb`
 
-~~Superseded by `evidence_val_final.ipynb`.~~
 
 ## `evidence_val_final.ipynb`
 
 Checks and repairs missing evidence rows. Repair fallback is decircularized (dataset+split only, no caption). Labeled-leak assert confirms 0 Caption: fields in evidence_text.
 
-## `stance_scoring_fixed_updated.ipynb`
 
-~~Superseded by `stance_scoring_final.ipynb`.~~
 
 ## `stance_scoring_final.ipynb`
 
@@ -779,10 +767,6 @@ Outputs:
 ```text
 cache/stream_c/stance_scores/stream_c_stance_scores_all.csv
 ```
-
-## `stream_c_results_fixed_updated.ipynb`
-
-~~Superseded by `stream_c_results_final.ipynb`.~~
 
 ## `stream_c_results_final.ipynb`
 
