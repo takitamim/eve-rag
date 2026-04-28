@@ -875,86 +875,101 @@ https://github.com/Sefayet-Alam/eve-rag/blob/main/
 
 ---
 
-
 ## EDA figures
 
-| Figure | GitHub link |
+| Figure | Link |
 |---|---|
-| Class balance | [eda_class_balance_processed.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/eda_class_balance_processed.png) |
-| Caption length | [eda_caption_length_processed.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/eda_caption_length_processed.png) |
-| Image coverage | [eda_image_coverage_processed.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/eda_image_coverage_processed.png) |
+| Class balance | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/eda_class_balance_processed.png) |
+| Caption length | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/eda_caption_length_distribution.png) |
+| Image coverage | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/eda_image_coverage_processed.png) |
 
-![EDA Class Balance](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/eda_class_balance_processed.png)
-![EDA Caption Length](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/eda_caption_length_processed.png)
-![EDA Image Coverage](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/eda_image_coverage_processed.png)
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/eda_class_balance_processed.png" width="600"/>
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/eda_caption_length_distribution.png" width="600"/>
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/eda_image_coverage_processed.png" width="600"/>
 
 ---
 
 ## Stream A figures
 
-| Figure | GitHub link |
+| Figure | Link |
 |---|---|
-| Summary bar | [stream_a_summary_bar.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_a_summary_bar.png) |
-| MMFakeBench confusion | [stream_a_confusion_mmfakebench_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_a_confusion_mmfakebench_test.png) |
-| VERITE confusion | [stream_a_confusion_verite_test_local.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_a_confusion_verite_test_local.png) |
-| MMFakeBench ROC | [stream_a_roc_mmfakebench_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_a_roc_mmfakebench_test.png) |
-| VERITE ROC | [stream_a_roc_verite_test_local.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_a_roc_verite_test_local.png) |
+| Summary bar | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_a_summary_bar.png) |
+| MMFakeBench confusion | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_a_confusion_mmfakebench_test.png) |
+| VERITE confusion | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_a_confusion_verite_test_local.png) |
+| MMFakeBench ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_a_roc_mmfakebench_test.png) |
+| VERITE ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_a_roc_verite_test_local.png) |
 
-![Stream A Summary](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_a_summary_bar.png)
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_a_summary_bar.png" width="600"/>
 
 ---
 
 ## Stream B figures
 
-| Figure | GitHub link |
+| Figure | Link |
 |---|---|
-| Summary bar | [stream_b_summary_bar.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_b_summary_bar.png) |
-| NewsCLIP ROC | [stream_b_roc_newsclippings_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_b_roc_newsclippings_test.png) |
-| MMFakeBench ROC | [stream_b_roc_mmfakebench_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_b_roc_mmfakebench_test.png) |
-| VERITE ROC | [stream_b_roc_verite_test_local.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_b_roc_verite_test_local.png) |
-| Score distribution | [stream_b_score_distribution_newsclippings_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_b_score_distribution_newsclippings_test.png) |
+| Summary bar | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_b_summary_bar.png) |
+| NewsCLIP ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_b_roc_newsclippings_test.png) |
+| MMFakeBench ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_b_roc_mmfakebench_test.png) |
+| VERITE ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_b_roc_verite_test_local.png) |
+| Score distribution | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_b_score_distribution_newsclippings_test.png) |
 
-![Stream B Summary](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_b_summary_bar.png)
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_b_summary_bar.png" width="600"/>
 
 ---
 
 ## Stream C figures
 
-| Figure | GitHub link |
+| Figure | Link |
 |---|---|
-| Summary bar | [stream_c_summary_bar.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_c_summary_bar.png) |
-| NewsCLIP confusion | [stream_c_confusion_newsclippings_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_c_confusion_newsclippings_test.png) |
-| NewsCLIP ROC | [stream_c_roc_newsclippings_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_c_roc_newsclippings_test.png) |
+| Summary bar | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_c_summary_bar.png) |
+| NewsCLIP confusion | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_c_confusion_newsclippings_test.png) |
+| NewsCLIP ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_c_roc_newsclippings_test.png) |
 
-![Stream C Summary](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/stream_c_summary_bar.png)
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/stream_c_summary_bar.png" width="600"/>
 
 ---
 
 ## All-streams baseline summary
 
-| Figure | GitHub link |
+| Figure | Link |
 |---|---|
-| All streams + baselines bar | [all_streams_summary_bar.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/all_streams_summary_bar.png) |
+| All streams + baselines bar | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/all_streams_summary_bar.png) |
 
-![All Streams Summary](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/all_streams_summary_bar.png)
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/all_streams_summary_bar.png" width="600"/>
 
 ---
 
 ## Fusion figures
 
-| Figure | GitHub link |
+| Figure | Link |
 |---|---|
-| Fusion summary bar (default vs ablations) | [fusion_summary_bar.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_summary_bar.png) |
-| Gate distribution (interpretability) | [fusion_gate_distribution.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_gate_distribution.png) |
-| NewsCLIP confusion | [fusion_confusion_newsclippings_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_confusion_newsclippings_test.png) |
-| NewsCLIP ROC | [fusion_roc_newsclippings_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_roc_newsclippings_test.png) |
-| MMFakeBench confusion | [fusion_confusion_mmfakebench_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_confusion_mmfakebench_test.png) |
-| MMFakeBench ROC | [fusion_roc_mmfakebench_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_roc_mmfakebench_test.png) |
-| VERITE confusion | [fusion_confusion_verite_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_confusion_verite_test.png) |
-| VERITE ROC | [fusion_roc_verite_test.png](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_roc_verite_test.png) |
+| Fusion summary bar | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_summary_bar.png) |
+| Gate distribution | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_gate_distribution.png) |
+| NewsCLIP confusion | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_confusion_newsclippings_test.png) |
+| NewsCLIP ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_roc_newsclippings_test.png) |
+| MMFakeBench confusion | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_confusion_mmfakebench_test.png) |
+| MMFakeBench ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_roc_mmfakebench_test.png) |
+| VERITE confusion | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_confusion_verite_test.png) |
+| VERITE ROC | [view](https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_roc_verite_test.png) |
 
-![Fusion Summary Bar](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_summary_bar.png)
-![Fusion Gate Distribution](https://github.com/Sefayet-Alam/eve-rag/blob/main/paper/figures/fusion_gate_distribution.png)
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_summary_bar.png" width="600"/>
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/paper/figures/fusion_gate_distribution.png" width="600"/>
+
+---
+
+## Finalized figures (hero)
+
+Three new consolidated figures generated by `08_paper/figures.ipynb`, in `finalized_outputs/figures/`:
+
+| File | Purpose | Paper section |
+|---|---|---|
+| `00_HERO_auroc_comparison.png` | Single-panel: GSAF beats every ablation across 3 benchmarks | Main results §5 |
+| `00_HERO_gate_attribution.png` | Two-panel interpretability: gate weights per dataset and per bucket | Discussion §6 |
+| `00_HERO_ablation_delta.png` | Compact Δ-AUROC heatmap (paper-coloured) | Ablation §5 |
+
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/finalized_outputs/figures/00_HERO_auroc_comparison.png" width="700"/>
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/finalized_outputs/figures/00_HERO_gate_attribution.png" width="700"/>
+<img src="https://raw.githubusercontent.com/Sefayet-Alam/eve-rag/main/finalized_outputs/figures/00_HERO_ablation_delta.png" width="700"/>
 
 ---
 ## Finalized figures (hero)
