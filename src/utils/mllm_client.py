@@ -30,7 +30,7 @@ class MLLMClient:
     rpm_limit: int = 14            # headroom under 15 RPM
     rpd_limit: int = 950           # headroom under 1000 RPD
     cache_dir: Path | None = None
-    image_max_side: int = 384
+    image_max_side: int = 256 
     max_retries: int = 5
     request_log: list = field(default_factory=list)
 
