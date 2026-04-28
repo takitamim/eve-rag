@@ -1,0 +1,5 @@
+model,Δ AUROC (MMFB),Δ AUROC (NC),Δ AUROC (VERITE)
+GSAF − Stream A,-0.2259,-0.0108,-0.0076
+GSAF − Stream B,-0.2256,-0.2382,+0.0084
+GSAF − Stream C,-0.2496,-0.0084,-0.0000
+GSAF (MLP fusion),-0.2187,-0.0006,+0.0041

@@ -1,0 +1,19 @@
+stream,dataset,tuning,acc,f1,auroc
+Stream A,mmfakebench_test,,62.56,70.7,65.41
+Stream A,mmfakebench_test,,70.0,82.35,
+Stream A,mmfakebench_test,,58.1,65.08,64.14
+Stream A,verite_test_local,,53.3,60.6,53.83
+Stream A,verite_test_local,,66.51,79.88,
+Stream A,verite_test_local,,48.47,55.8,47.82
+Stream B,newsclippings_val,,66.22,64.48,73.42
+Stream B,newsclippings_test,,65.87,64.11,73.91
+Stream B,mmfakebench_test,,46.95,44.84,63.35
+Stream B,verite_test_local,,63.77,77.25,49.12
+Stream C,newsclippings_val,default_0.5,50.73,48.24,51.38
+Stream C,newsclippings_val,tuned,50.73,48.24,51.38
+Stream C,newsclippings_test,default_0.5,51.53,49.18,51.81
+Stream C,newsclippings_test,tuned,51.53,49.18,51.81
+Stream C,mmfakebench_test,default_0.5,34.78,14.59,69.43
+Stream C,mmfakebench_test,tuned,73.65,82.73,69.43
+Stream C,verite_test,default_0.5,36.16,17.76,45.94
+Stream C,verite_test,tuned,36.16,17.76,45.94

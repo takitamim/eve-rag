@@ -1,0 +1,18 @@
+\begin{table}[!t]
+\centering
+\caption{Datasets used in this work. NewsCLIPpings provides the primary in-distribution training and evaluation; MMFakeBench and VERITE are held-out for cross-dataset testing.}
+\label{tab:datasets}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{dataset_split} & \textbf{rows} & \textbf{label_0_match} & \textbf{label_1_mismatch} & \textbf{has_image_rows} & \textbf{unique_image_ids} & \textbf{empty_captions} \\
+\midrule
+NewsCLIPpings train & 71,072 & 35,536 & 35,536 & 0 & 59,876 & 0 \\
+NewsCLIPpings val & 7,024 & 3,512 & 3,512 & 0 & 5,943 & 0 \\
+NewsCLIPpings test & 7,264 & 3,632 & 3,632 & 0 & 6,147 & 0 \\
+VERITE test & 1,001 & 338 & 663 & 621 & 495 & 0 \\
+MMFakeBench val & 1,000 & 300 & 700 & 1,000 & 1,000 & 0 \\
+MMFakeBench test & 10,000 & 3,000 & 7,000 & 10,000 & 10,000 & 0 \\
+All & 97,361 & 46,318 & 51,043 & 11,621 & 83,461 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}

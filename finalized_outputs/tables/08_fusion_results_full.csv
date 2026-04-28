@@ -1,0 +1,11 @@
+model,ablation,dataset,tuning,thr,acc,f1,f1_macro,auroc
+GSAF,none,newsclippings_val,default,0.5,68.99,67.25,68.9,76.01
+GSAF,none,newsclippings_val,tuned,0.482,69.15,68.47,69.13,76.01
+GSAF,none,newsclippings_test,default,0.5,68.68,66.88,68.59,76.32
+GSAF,none,newsclippings_test,tuned,0.482,69.01,68.34,69.0,76.32
+GSAF,none,mmfakebench_val_tune,default,0.5,80.8,85.8,78.08,89.92
+GSAF,none,mmfakebench_val_tune,tuned,0.486,82.0,86.84,79.18,89.92
+GSAF,none,mmfakebench_test,default,0.5,78.28,84.28,74.57,87.83
+GSAF,none,mmfakebench_test,tuned,0.486,78.27,84.41,74.28,87.83
+GSAF,none,verite_test,default,0.5,62.64,76.33,43.85,48.13
+GSAF,none,verite_test,tuned,0.482,62.54,76.34,43.21,48.13
