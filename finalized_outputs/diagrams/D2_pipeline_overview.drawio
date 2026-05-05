@@ -1,0 +1,135 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="100" value="MAGE: End-to-End Pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="20" width="600" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- ROW 1: Raw datasets -->
+    <mxCell id="10" value="NewsCLIPpings&#xa;85,360 pairs&#xa;(mainstream news)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=10;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="90" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="MMFakeBench&#xa;11,000 pairs&#xa;(diverse fake types)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=10;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="380" y="90" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="VERITE&#xa;1,001 pairs&#xa;(real-world fact-checks)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="660" y="90" width="200" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- ROW 2: Preprocessing -->
+    <mxCell id="20" value="Preprocessing&#xa;• Flat image folder (11,495 local images)&#xa;• Unified manifest: all.csv (97,361 rows)&#xa;• Train / val / test splits per dataset" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1faee;strokeColor=#457b9d;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="230" y="250" width="450" height="90" as="geometry"/>
+    </mxCell>
+
+    <!-- Arrows raw → preprocess -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="10" target="20" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="11" target="20" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="12" target="20" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- FEATURE EXTRACTION label -->
+    <mxCell id="101" value="Feature Extraction (per stream)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=13;fontStyle=3;" vertex="1" parent="1">
+      <mxGeometry x="310" y="370" width="300" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ROW 3: Three streams side by side -->
+
+    <!-- Stream A -->
+    <mxCell id="30" value="spaCy NER&#xa;Extract PERSON, LOC, ORG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="420" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="CLIP ViT-B/32&#xa;Visual Grounding" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="510" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="32" value="Entity Scorer&#xa;Aggregate grounding scores" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="600" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="33" value="12 features / pair&#xa;(Stream A)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="690" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Stream B -->
+    <mxCell id="40" value="CLIP Embeddings&#xa;(PKL + computed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="355" y="420" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="41" value="Stage 1 MLP&#xa;cosine sim + 10 features" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="355" y="510" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="42" value="Stage 2 MLP&#xa;Fine-tune on hard negatives" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="355" y="600" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="43" value="11 features / pair&#xa;(Stream B)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="355" y="690" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Stream C -->
+    <mxCell id="50" value="Evidence Retrieval&#xa;(decircularized)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="650" y="420" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="51" value="DeBERTa NLI&#xa;SUPPORT / CONTRADICT / NEUTRAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="650" y="510" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="52" value="SBERT Stance Aggregation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="650" y="600" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="53" value="7 features / pair&#xa;(Stream C)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="650" y="690" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Stream internal edges -->
+    <mxCell id="es1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="20" target="30" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="30" target="31" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="31" target="32" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="32" target="33" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="20" target="40" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="40" target="41" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="41" target="42" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="42" target="43" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="20" target="50" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="50" target="51" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="51" target="52" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="es12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="52" target="53" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ROW 4: Fusion feature table -->
+    <mxCell id="60" value="Fusion Feature Table&#xa;fusion_features_all.csv&#xa;97,361 rows × 30 columns (12+11+7)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e76f51;fontColor=#ffffff;strokeColor=#b54e34;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="255" y="800" width="400" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="33" target="60" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="ef2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="43" target="60" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="ef3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="53" target="60" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ROW 5: GSAF Training -->
+    <mxCell id="70" value="GSAF Training&#xa;NC train (71,072) + 500 MMFB val rows&#xa;Mixed-domain; early stopping on NC val AUROC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e76f51;fontColor=#ffffff;strokeColor=#b54e34;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="255" y="930" width="400" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="60" target="70" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ROW 6: Trained model -->
+    <mxCell id="80" value="Trained GSAF Model&#xa;fusion_model.pt  |  8,164 parameters&#xa;Best val AUROC: 76.01%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#457b9d;fontColor=#ffffff;strokeColor=#2e5570;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="255" y="1060" width="400" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="70" target="80" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- ROW 7: Results -->
+    <mxCell id="90" value="NewsCLIPpings test&#xa;AUROC 76.32%&#xa;Acc 69.01%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="1200" width="190" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="91" value="MMFakeBench test&#xa;AUROC 87.83%&#xa;F1 84.41%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="360" y="1200" width="190" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="92" value="VERITE test&#xa;AUROC 48.13%&#xa;(OOD — near random)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="660" y="1200" width="190" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="er1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="80" target="90" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="er2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="80" target="91" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="er3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="80" target="92" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- Finalized outputs note -->
+    <mxCell id="93" value="finalized_outputs/&#xa;15 tables · 28 figures · 4 LaTeX files" style="text;html=1;strokeColor=#457b9d;fillColor=#f1faee;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="910" y="1200" width="230" height="70" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

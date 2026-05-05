@@ -1,0 +1,117 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="100" value="MAGE: GSAF Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="20" width="500" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- INPUT FEATURES -->
+    <mxCell id="10" value="Stream A features&#xa;(12-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="160" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="Stream B features&#xa;(11-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="360" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="Stream C features&#xa;(7-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="560" width="180" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- PROJECTORS -->
+    <mxCell id="20" value="Linear(12→32)&#xa;LayerNorm + ReLU + Dropout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="310" y="150" width="210" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" value="Linear(11→32)&#xa;LayerNorm + ReLU + Dropout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="310" y="350" width="210" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="22" value="Linear(7→32)&#xa;LayerNorm + ReLU + Dropout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="310" y="550" width="210" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- Projected outputs h_A, h_B, h_C -->
+    <mxCell id="30" value="h_A (32-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#264653;fontColor=#ffffff;strokeColor=#1a3340;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="590" y="165" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" value="h_B (32-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2a9d8f;fontColor=#ffffff;strokeColor=#1d6e65;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="590" y="365" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="32" value="h_C (32-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9c46a;fontColor=#333333;strokeColor=#c9a030;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="590" y="565" width="130" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- CONCATENATE -->
+    <mxCell id="40" value="Concatenate&#xa;h_A ‖ h_B ‖ h_C&#xa;→ 96-dim" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#457b9d;fontColor=#ffffff;strokeColor=#2e5570;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="790" y="340" width="150" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- GATE MLP -->
+    <mxCell id="50" value="Gate MLP&#xa;Linear(96→32) → ReLU&#xa;Linear(32→3) → Softmax" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e76f51;fontColor=#ffffff;strokeColor=#b54e34;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="180" width="210" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- Gate outputs -->
+    <mxCell id="51" value="g_A, g_B, g_C&#xa;(sum = 1.0)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e76f51;fontColor=#ffffff;strokeColor=#b54e34;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="320" width="150" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- WEIGHTED SUM -->
+    <mxCell id="60" value="Weighted Sum&#xa;z = g_A·h_A + g_B·h_B + g_C·h_C&#xa;(32-dim)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#457b9d;fontColor=#ffffff;strokeColor=#2e5570;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="450" width="210" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- CLASSIFIER -->
+    <mxCell id="70" value="Classifier&#xa;Linear(32→16) → ReLU → Dropout&#xa;Linear(16→1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#457b9d;fontColor=#ffffff;strokeColor=#2e5570;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="610" width="210" height="80" as="geometry"/>
+    </mxCell>
+
+    <!-- SIGMOID -->
+    <mxCell id="71" value="sigmoid(logit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#457b9d;fontColor=#ffffff;strokeColor=#2e5570;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="760" width="210" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- OUTPUT -->
+    <mxCell id="80" value="P(OOC) ∈ [0, 1]&#xa;≥ threshold → OUT-OF-CONTEXT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#457b9d;fontColor=#ffffff;strokeColor=#2e5570;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="990" y="880" width="250" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- PARAM COUNT NOTE -->
+    <mxCell id="90" value="Total parameters: 8,164&#xa;(deliberately lightweight — intelligence is in frozen feature extractors)" style="text;html=1;strokeColor=#e76f51;fillColor=#fff3ee;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="790" y="880" width="160" height="60" as="geometry"/>
+    </mxCell>
+
+    <!-- EDGES: inputs → projectors -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="10" target="20" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="11" target="21" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="12" target="22" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- projectors → h vectors -->
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="20" target="30" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="21" target="31" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="22" target="32" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- h vectors → concat -->
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="30" target="40" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="31" target="40" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="32" target="40" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- concat → gate MLP -->
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="40" target="50" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- gate MLP → gate outputs -->
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="50" target="51" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- gate outputs → weighted sum (dashed) -->
+    <mxCell id="e12" value="× weights" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#e76f51;fontColor=#e76f51;fontSize=10;" edge="1" source="51" target="60" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- concat → weighted sum (h vectors path) -->
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="40" target="60" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+    <!-- weighted sum → classifier → sigmoid → output -->
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="60" target="70" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="70" target="71" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="71" target="80" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+  </root>
+</mxGraphModel>
