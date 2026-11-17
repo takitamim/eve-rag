@@ -26,3 +26,17 @@ __pycache__/
 secrets.yaml
 
 !*.docx
+
+# Local development artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+Thumbs.db
+.claude/
+*.code-workspace
